@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - أبشر أعمال</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <style>
+        /* Critical overrides for slider + overlay layout */
+        .login-wrapper {
+            width: 100%;
+            position: relative;
+            margin-top: 0;
+        }
+
+        .hero-slider {
+            width: 100%;
+            position: relative;
+        }
+
+        .slider-container {
+            width: 100%;
+            height: 480px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #3D80C1 0%, #1a5490 100%);
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.9s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .login-card-overlay {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            transform: translateY(-50%);
+            z-index: 15;
+        }
+
+        .login-card {
+            width: 420px;
+            max-width: 90vw;
+            background: #fff;
+            padding: 35px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider-btn {
+            position: absolute;
+            bottom: 20px;
+            background: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 21px;
+            opacity: 0.9;
+            z-index: 10;
+        }
+
+        .slider-btn.next {
+            right: 60px;
+        }
+
+        .slider-btn.prev {
+            right: 110px;
+        }
+
+        .services-section {
+            padding: 0 10%;
+            margin-top: 40px;
+        }
+
+        .page-title h1 {
+            text-align: right;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .service-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .service-card .icon-container {
+            margin-bottom: 15px;
+        }
+
+        .service-card .service-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .service-card .service-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .service-card .service-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .service-card .start-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--business-theme-color, #3D80C1);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .service-card .start-btn:hover {
+            background: #2a5f8f;
+        }
+
+        .service-card .start-btn .arrow {
+            width: 14px;
+            filter: brightness(0) invert(1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- شريط التحذير -->
+    <div class="warning-banner">
+        تنويه: هذه الصفحة نسخة تجريبية غير رسمية، ولا تحتوي على أي خدمات حقيقية، ولا ترتبط بمنصة أبشر أو وزارة الداخلية.
+    </div>
+
+    <!-- الهيدر -->
+    <header class="top-header">
+        <div class="top-header-inner">
+            <div class="header-left">
+                <img src="/img/Absher_Business_logo.svg" alt="Absher" class="logo-absher">
+            </div>
+            <div class="header-right">
+                <div class="header-center">
+                    <a id="switchLang" href="javascript:void(0);" class="lang-switch" style="color: #000;">
+                        <span class="ar-text">English</span>
+                        <span class="en-text">العربية</span>
+                        <img src="/img/globe.svg" class="globe">
+                    </a>
+                </div>
+                <img src="/img/vission-logo.png" alt="Vision 2030" class="logo-2030">
+                <img src="/img/moi-logo.svg" alt="MOI" class="logo-moi">
+            </div>
+        </div>
+    </header>
+
+    <!-- WRAPPER: Slider + Login Form -->
+    <section class="login-wrapper">
+        <!-- Login Form Overlay -->
+        <div class="login-card-overlay">
+            <form action="/login" method="POST" class="login-card">
+                <h2>تسجيل الدخول</h2>
+
+                <label for="username">اسم المستخدم أو رقم الهوية</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" placeholder="1114567890" required>
+                </div>
+
+                <label for="password">كلمة المرور</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" placeholder="ادخل كلمة المرور" required>
+                </div>
+
+                <a href="#" class="forgot">نسيت كلمة المرور؟</a>
+
+                <button type="submit" class="login-btn">تسجيل الدخول</button>
+
+                <a href="#" class="new-user">مستخدم جديد؟</a>
+            </form>
+        </div>
+
+        <!-- Hero Slider -->
+        <div class="hero-slider">
+            <div class="slider-container">
+                <div class="slide active">
+                    <img src="/img/muqeem.jpg" alt="خدمات مقيم">
+                </div>
+                <div class="slide">
+                    <img src="/img/passport_update.jpg" alt="تحديث الجواز">
+                </div>
+                <button class="slider-btn prev">❮</button>
+                <button class="slider-btn next">❯</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <div class="services-section">
+        <section class="page-title">
+            <h1>الخدمات الأكثر استخداماً</h1>
+        </section>
+
+        <section class="services">
+            <!-- توثيق عقود -->
+            <div class="service-card">
+                <div class="icon-container">
+                    <img src="/img/contracts.png" class="service-icon" alt="">
+                </div>
+                <h2 class="service-name">توثيق عقود</h2>
+                <p class="service-desc">
+                    تُمكّن هذه الخدمة من إنشاء وتوثيق عقود المنشآت المتوسطة والصغيرة واعتمادها بشكل رسمي.
+                </p>
+                <a href="/service" class="start-btn">
+                    <img src="/img/arrow.svg" class="arrow" alt="">
+                    بدء الخدمة
+                </a>
+            </div>
+
+            <!-- إصدار الإقامة -->
+            <div class="service-card">
+                <div class="icon-container">
+                    <img src="/img/car.png" class="service-icon" alt="">
+                </div>
+                <h2 class="service-name">إصدار الإقامة</h2>
+                <p class="service-desc">
+                    إصدار هوية مقيم للمقيمين التابعين للمنشأة إلكترونيا.
+                </p>
+                <a href="#" class="start-btn" style="opacity: 0.5; pointer-events: none;">
+                    قريباً
+                </a>
+            </div>
+
+            <!-- تجديد الإقامة -->
+            <div class="service-card">
+                <div class="icon-container">
+                    <img src="/img/iqama.png" class="service-icon" alt="">
+                </div>
+                <h2 class="service-name">تجديد الإقامة</h2>
+                <p class="service-desc">
+                    تجديد هوية مقيم للمقيمين التابعين للمنشأة إلكترونياً.
+                </p>
+                <a href="#" class="start-btn" style="opacity: 0.5; pointer-events: none;">
+                    قريباً
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Slider Logic
+        let slideIndex = 0;
+        const slides = document.querySelectorAll(".slide");
+        const nextBtn = document.querySelector(".slider-btn.next");
+        const prevBtn = document.querySelector(".slider-btn.prev");
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove("active");
+                if (i === index) slide.classList.add("active");
+            });
+        }
+
+        function nextSlide() {
+            slideIndex = (slideIndex + 1) % slides.length;
+            showSlide(slideIndex);
+        }
+
+        function prevSlide() {
+            slideIndex = (slideIndex - 1 + slides.length) % slides.length;
+            showSlide(slideIndex);
+        }
+
+        // Auto play
+        setInterval(nextSlide, 5000);
+
+        // Buttons
+        if (nextBtn) nextBtn.addEventListener("click", nextSlide);
+        if (prevBtn) prevBtn.addEventListener("click", prevSlide);
+
+        // Language Switch
+        const switchLang = document.getElementById('switchLang');
+        if (switchLang) {
+            switchLang.addEventListener('click', () => {
+                const html = document.documentElement;
+                if (html.lang === 'ar') {
+                    html.lang = 'en';
+                    html.classList.remove('rtl');
+                    html.classList.add('ltr');
+                } else {
+                    html.lang = 'ar';
+                    html.classList.remove('ltr');
+                    html.classList.add('rtl');
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

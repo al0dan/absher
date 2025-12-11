@@ -1,0 +1,13 @@
+Flask==3.0.0
+flask-cors==4.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+Flask-Limiter==3.5.0
+bleach==6.1.0
+gunicorn==21.2.0
+pytest==8.0.0
+locust==2.23.1
+playwright==1.40.0
+Flask-SQLAlchemy
+psycopg2-binary
+Flask-Mail

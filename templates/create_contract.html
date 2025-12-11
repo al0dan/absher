@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ar" class="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء عقد توريد - أبشر أعمال</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Specific overrides for this page if needed */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--business-theme-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- Header -->
+    <header class="top-header">
+        <div class="top-header-inner">
+            <div class="header-left">
+                <img src="/img/Absher_Business_logo.svg" alt="Absher" class="logo-absher" style="height: 80px;">
+            </div>
+            <div class="header-right">
+                <div class="header-center">
+                    <a id="switchLang" href="javascript:void(0);" class="lang-switch">
+                        <span class="ar-text">English</span>
+                        <span class="en-text">العربية</span>
+                        <img src="/img/globe.svg" class="globe">
+                    </a>
+                </div>
+                <img src="/img/vission-logo.png" alt="Vision 2030" class="logo-2030">
+                <img src="/img/moi-logo.svg" alt="MOI" class="logo-moi">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="absher-form-section">
+
+        <!-- Breadcrumb / Back Link -->
+        <div style="margin-bottom: 20px;">
+            <a href="/service" style="color: #666; text-decoration: none; font-weight: 600;">
+                الرئيسية > الخدمات > عقود التوريد
+            </a>
+        </div>
+
+        <div class="form-card" role="form" aria-labelledby="formTitle">
+            <h1 class="form-title" id="formTitle">بيانات العقد الجديد</h1>
+
+            <form id="contractForm" aria-label="نموذج إنشاء عقد جديد">
+                <!-- Supplier Section (Auto-filled from login) -->
+                <h3
+                    style="color: var(--business-theme-color); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+                    بيانات الطرف الأول (المورد)
+                    <span style="font-size: 12px; color: #666; font-weight: normal;">- يتم تعبئتها تلقائياً من
+                        حسابك</span>
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="supplier">اسم المنشأة</label>
+                    <input type="text" class="form-control" id="supplier" name="supplier"
+                        value="{{ user.name if user else '' }}" readonly
+                        style="background: #f5f5f5; cursor: not-allowed;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label class="form-label" for="supplier_cr">رقم السجل التجاري</label>
+                        <input type="text" class="form-control" id="supplier_cr" name="supplier_cr"
+                            value="{{ user.cr if user else '' }}" readonly
+                            style="background: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="supplier_vat">الرقم الضريبي (VAT)</label>
+                        <input type="text" class="form-control" id="supplier_vat" name="supplier_vat"
+                            value="{{ user.vat if user else '' }}" readonly
+                            style="background: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <!-- Buyer Section -->
+                <h3
+                    style="color: var(--business-theme-color); border-bottom: 1px solid #eee; padding-bottom: 10px; margin: 30px 0 20px;">
+                    بيانات الطرف الثاني (المشتري)</h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="buyer">اسم المنشأة / العميل</label>
+                    <input type="text" class="form-control" id="buyer" name="buyer"
+                        placeholder="اسم العميل (فرد أو منشأة)" aria-required="true" minlength="3" maxlength="100"
+                        required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label class="form-label" for="buyer_cr">رقم السجل التجاري</label>
+                        <input type="text" class="form-control" id="buyer_cr" name="buyer_cr" placeholder="1010XXXXXX"
+                            pattern="[0-9]{10}" maxlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="buyer_vat">الرقم الضريبي (VAT)</label>
+                        <input type="text" class="form-control" id="buyer_vat" name="buyer_vat"
+                            placeholder="3XXXXXXXXXXXXX3" pattern="[0-9]{15}" maxlength="15">
+                    </div>
+                </div>
+
+                <!-- Contract Details -->
+                <h3
+                    style="color: var(--business-theme-color); border-bottom: 1px solid #eee; padding-bottom: 10px; margin: 30px 0 20px;">
+                    تفاصيل العقد</h3>
+
+                <div class="form-group">
+                    <label class="form-label" for="items">تفاصيل البضائع / الخدمات</label>
+                    <textarea class="form-control" id="items" name="items" rows="4"
+                        placeholder="اكتب تفاصيل البضائع والكميات..." aria-required="true" minlength="10"
+                        maxlength="500" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="price">قيمة العقد (ريال سعودي)</label>
+                    <input type="number" class="form-control" id="price" name="price" placeholder="0.00" min="1"
+                        step="0.01" required>
+                </div>
+
+                <div style="margin-top: 30px; text-align: left;">
+                    <button type="submit" class="btn-absher" id="submitBtn" aria-label="إنشاء العقد">إنشاء
+                        العقد</button>
+                </div>
+
+                <div class="loader" id="loader" role="status" aria-live="polite" aria-label="جاري التحميل"></div>
+            </form>
+
+            <!-- Result Section -->
+            <div id="contractResult" class="result-box hidden">
+                <div style="text-align: center; padding: 30px;">
+                    <div
+                        style="width: 60px; height: 60px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <span style="font-size: 30px; color: var(--individual-theme-color);">✓</span>
+                    </div>
+                    <h3 style="color: var(--individual-theme-color); margin-bottom: 10px;">تم إنشاء العقد بنجاح</h3>
+                    <p style="color: #666; margin-bottom: 25px;">
+                        رقم المرجع: <span id="contractIdBadge"
+                            style="font-weight: bold; color: var(--business-theme-color); font-size: 20px;"></span>
+                    </p>
+
+                    <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                        <p style="color: #555; margin-bottom: 15px;">لتوقيع العقد، شارك الرابط التالي مع الطرف الثاني:
+                        </p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" class="form-control" id="buyerLink" readonly
+                                style="background: #fff; text-align: left; direction: ltr;">
+                            <button class="btn-absher-outline" style="padding: 10px 20px; white-space: nowrap;"
+                                onclick="copyLink('buyerLink')">نسخ الرابط</button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <a href="#" class="btn-absher" id="viewContractBtn" style="padding: 12px 30px;">الذهاب
+                            للتوقيع</a>
+                        <button class="btn-absher-outline" style="padding: 12px 30px;" onclick="location.reload()">إنشاء
+                            عقد جديد</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000;">
+        تم النسخ
+    </div>
+
+    <script>
+        const API_KEY = '{{ API_KEY }}';
+
+        // Real-time Validation
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function () {
+                if (this.checkValidity()) {
+                    this.style.borderColor = '#2e7d32'; // Green
+                    this.style.boxShadow = '0 0 0 1px #2e7d32';
+                } else {
+                    this.style.borderColor = '#c62828'; // Red
+                    this.style.boxShadow = 'none';
+                }
+            });
+        });
+
+        // Checkboxes Logic
+        const aiCheckbox = document.getElementById('useAI');
+        const manualCheckbox = document.getElementById('manualFill');
+        const loader = document.getElementById('loader');
+        const resultSection = document.getElementById('contractResult');
+        const form = document.getElementById('contractForm'); // Ensure form is defined
+
+        function toggleMode(mode) {
+            if (mode === 'ai') {
+                if (aiCheckbox.checked) manualCheckbox.checked = false;
+            } else {
+                if (manualCheckbox.checked) aiCheckbox.checked = false;
+            }
+        }
+
+        // Copy Link
+        function copyLink(elementId) {
+            const input = document.getElementById(elementId);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                // Show simple alert or toast
+                alert('تم نسخ الرابط');
+            });
+        }
+
+        // Form Submit
+        if (form) {
+            console.log('Form found, attaching submit handler');
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                console.log('Submit event triggered');
+
+                // Check validation
+                if (!this.checkValidity()) {
+                    console.log('Form validation FAILED');
+                    this.reportValidity();
+                    return;
+                }
+
+                console.log('Form validation PASSED, showing loader');
+                loader.style.display = 'block';
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                // Add mode (handle missing checkbox safely)
+                data.mode = (aiCheckbox && aiCheckbox.checked) ? 'ai' : 'manual';
+
+                try {
+                    const response = await fetch('/api/contract', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': '{{ API_KEY }}'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    loader.style.display = 'none';
+
+                    if (response.ok) {
+                        document.getElementById('contractResult').classList.remove('hidden');
+                        document.getElementById('contractIdBadge').textContent = '#' + result.id;
+
+                        // Update link to force login usage
+                        const baseUrl = window.location.origin;
+                        document.getElementById('buyerLink').value = `${baseUrl}/contract/${result.id}`;
+
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    } else {
+                        alert('خطأ: ' + (result.error || 'فشل إنشاء العقد'));
+                    }
+                } catch (error) {
+                    loader.style.display = 'none';
+                    alert('حدث خطأ في الاتصال');
+                    console.error(error);
+                }
+            });
+        }
+
+        // --- LANGUAGE SWITCH ---
+        const switchLang = document.getElementById('switchLang');
+        if (switchLang) {
+            switchLang.addEventListener('click', () => {
+                const html = document.documentElement;
+                if (html.lang === 'ar') {
+                    html.lang = 'en';
+                    html.classList.remove('rtl');
+                    html.classList.add('ltr');
+                } else {
+                    html.lang = 'ar';
+                    html.classList.remove('ltr');
+                    html.classList.add('rtl');
+                }
+            });
+        }
+
+        // --- AUTO-FILL BY CR (User Request) ---
+        const buyerCrInput = document.getElementById('buyer_cr');
+        const buyerNameInput = document.getElementById('buyer');
+        const buyerVatInput = document.getElementById('buyer_vat');
+
+        if (buyerCrInput) {
+            buyerCrInput.addEventListener('blur', async () => {
+                const cr = buyerCrInput.value.trim();
+                // Basic check before API call
+                if (cr.length === 10 && /^\d+$/.test(cr)) {
+                    const originalPlaceholder = buyerNameInput.placeholder;
+                    buyerNameInput.placeholder = "جاري البحث...";
+
+                    try {
+                        const response = await fetch('/api/lookup/cr', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ cr: cr })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.found) {
+                            buyerNameInput.value = data.company_name;
+                            if (buyerVatInput) buyerVatInput.value = data.vat_number;
+
+                            // Visual Feedback
+                            buyerNameInput.style.backgroundColor = "#e8f5e9";
+                            setTimeout(() => {
+                                buyerNameInput.style.backgroundColor = "";
+                            }, 1000);
+                        }
+                    } catch (e) {
+                        console.error("Auto-fill error:", e);
+                    } finally {
+                        buyerNameInput.placeholder = originalPlaceholder;
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

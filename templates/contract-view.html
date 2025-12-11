@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" class="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض العقد - أبشر أعمال</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .page-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .contract-meta {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+        }
+
+        .contract-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .contract-text-body {
+            line-height: 2.2;
+            font-size: 16px;
+            background: linear-gradient(to bottom, #fefefe, #f9f9f9);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            border-right: 4px solid var(--business-theme-color);
+            white-space: pre-wrap;
+            margin-bottom: 40px;
+            text-align: justify;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .signatures-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .signature-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .role-header {
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .party-name {
+            color: var(--business-theme-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Canvas */
+        canvas.signature-pad {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: crosshair;
+            margin-bottom: 10px;
+            touch-action: none;
+            /* Critical for mobile touch drawing */
+            width: 100%;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .signed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .pending {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: flex-end;
+        }
+
+        .printable-content {
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="top-header">
+        <div class="top-header-inner">
+            <div class="header-left">
+                <img src="/img/Absher_Business_logo.svg" alt="Absher" class="logo-absher" style="height: 80px;">
+            </div>
+            <div class="header-right">
+                <img src="/img/vission-logo.png" style="height:55px; margin-left:10px;">
+                <img src="/img/moi-logo.svg" style="height:55px">
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        {% if error %}
+        <div class="page-container" style="text-align: center; padding: 60px;">
+            <h2 style="color: #c62828;">عفواً، العقد غير موجود أو الرابط غير صالح</h2>
+            <a href="/" class="btn-absher" style="margin-top: 20px;">العودة للرئيسية</a>
+        </div>
+        {% else %}
+
+        <div class="actions-bar container">
+            <a href="/contract/{{ contract.id }}/pdf" class="btn-absher-outline" target="_blank"
+                style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                تحميل PDF
+                <img src="/img/arrow.svg" width="12" style="transform: rotate(90deg)">
+            </a>
+            <button class="btn-absher-outline" onclick="window.print()">طباعة</button>
+        </div>
+
+        <div class="page-container" id="contractContent">
+            <!-- PDF Header with Logos -->
+            <div class="pdf-header"
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3D80C1; padding-bottom: 20px; margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="/img/Absher_Business_logo.svg" alt="Absher" style="height: 70px; width: auto;">
+                    <div>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--business-theme-color);">أبشر أعمال
+                        </div>
+                        <div style="font-size: 13px; color: #666;">منصة عقود - وزارة الداخلية</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="/img/vission-logo.png" alt="Vision 2030" style="height: 55px; width: auto;">
+                    <img src="/img/moi-logo.svg" alt="MOI" style="height: 50px; width: auto;">
+                </div>
+            </div>
+
+            <div class="contract-meta">
+                <h1 style="font-size: 24px; margin: 0; color: var(--business-theme-color);">وثيقة عقد توريد</h1>
+                <span
+                    style="background: #e3f2fd; color: #1565c0; padding: 6px 12px; border-radius: 6px; font-weight: bold;">
+                    #{{ contract.id }}
+                </span>
+            </div>
+
+            <div class="contract-text-body">{{ contract.contract_text }}</div>
+
+            <div class="signatures-grid">
+
+                <!-- Supplier -->
+                <div class="signature-card">
+                    <div class="role-header">الطرف الأول (المورد)</div>
+                    <div class="party-name">{{ contract.supplier }}</div>
+                    {% if contract.supplier_vat %}
+                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        <span>الرقم الضريبي:</span> <span style="direction: ltr; display: inline-block;">{{
+                            contract.supplier_vat }}</span>
+                    </div>
+                    {% endif %}
+                    {% if contract.supplier_cr %}
+                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        <span>السجل التجاري:</span> {{ contract.supplier_cr }}
+                    </div>
+                    {% endif %}
+
+                    {% if contract.signed_by_supplier %}
+                    <div class="status-badge signed">تم التوقيع</div>
+                    <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                        بواسطة: {{ contract.supplier_name }}
+                    </div>
+                    <img src="{{ contract.supplier_signature }}" style="max-width: 150px; margin-top: 10px;"
+                        alt="Signature">
+                    {% else %}
+                    {% if view_role == 'supplier' %}
+                    <div style="margin-bottom: 10px; font-size: 14px;">الرجاء التوقيع أدناه:</div>
+                    <canvas id="supplierCanvas" width="300" height="150" class="signature-pad"></canvas>
+                    <input type="text" id="supplierName" class="form-control" placeholder="الاسم الكامل"
+                        style="margin-bottom: 10px;" value="{{ contract.supplier }}">
+                    <div style="display: flex; gap: 5px; justify-content: center;">
+                        <button class="btn-absher"
+                            onclick="saveSignature('supplier', 'supplierCanvas', 'supplierName')">اعتماد
+                            التوقيع</button>
+                        <button class="btn-absher-outline" onclick="clearCanvas('supplierCanvas')">مسح</button>
+                    </div>
+                    {% else %}
+                    <div class="status-badge pending">بانتظار التوقيع</div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Buyer -->
+                <div class="signature-card">
+                    <div class="role-header">الطرف الثاني (المشتري)</div>
+                    <div class="party-name">{{ contract.buyer }}</div>
+                    {% if contract.buyer_vat %}
+                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        <span>الرقم الضريبي:</span> <span style="direction: ltr; display: inline-block;">{{
+                            contract.buyer_vat }}</span>
+                    </div>
+                    {% endif %}
+                    {% if contract.buyer_cr %}
+                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                        <span>السجل التجاري:</span> {{ contract.buyer_cr }}
+                    </div>
+                    {% endif %}
+
+                    {% if contract.signed_by_buyer %}
+                    <div class="status-badge signed">تم التوقيع</div>
+                    <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                        بواسطة: {{ contract.buyer_name }}
+                    </div>
+                    <img src="{{ contract.buyer_signature }}" style="max-width: 150px; margin-top: 10px;"
+                        alt="Signature">
+                    {% else %}
+                    {% if view_role == 'buyer' %}
+                    <div style="margin-bottom: 10px; font-size: 14px;">الرجاء التوقيع أدناه:</div>
+                    <canvas id="buyerCanvas" width="300" height="150" class="signature-pad"></canvas>
+                    <input type="text" id="buyerName" class="form-control" placeholder="الاسم الكامل"
+                        style="margin-bottom: 10px;" value="{{ contract.buyer }}">
+                    <div style="display: flex; gap: 5px; justify-content: center;">
+                        <button class="btn-absher" onclick="saveSignature('buyer', 'buyerCanvas', 'buyerName')">اعتماد
+                            التوقيع</button>
+                        <button class="btn-absher-outline" onclick="clearCanvas('buyerCanvas')">مسح</button>
+                    </div>
+                    {% else %}
+                    <div class="status-badge pending">بانتظار التوقيع</div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        {% endif %}
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000;">
+        تم الحفظ
+    </div>
+
+    <script>
+        const API_KEY = '{{ API_KEY }}';
+        const CONTRACT_ID = '{{ contract.id if contract else "" }}';
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+
+        // Canvas Logic
+        function initCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+
+            // Resize canvas for better resolution on mobile
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function start(e) {
+                drawing = true;
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+            function end() {
+                drawing = false;
+            }
+            function draw(e) {
+                if (!drawing) return;
+                const pos = getPos(e);
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000';
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mouseup', end);
+            canvas.addEventListener('mousemove', draw);
+
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); }, { passive: false });
+            canvas.addEventListener('touchend', end);
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+        }
+
+        setTimeout(() => {
+            initCanvas('supplierCanvas');
+            initCanvas('buyerCanvas');
+        }, 500); // Small delay to ensure render
+
+        function clearCanvas(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        async function saveSignature(role, canvasId, nameId) {
+            const canvas = document.getElementById(canvasId);
+            const name = document.getElementById(nameId).value;
+
+            if (!name) { alert('الرجاء إدخال الاسم'); return; }
+
+            const dataUrl = canvas.toDataURL();
+
+            try {
+                const res = await fetch(`/api/contract/${CONTRACT_ID}/sign`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': API_KEY
+                    },
+                    body: JSON.stringify({ role, name, signature_data: dataUrl })
+                });
+
+                if (res.ok) {
+                    showToast('تم اعتماد التوقيع بنجاح');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert('حدث خطأ أثناء الحفظ');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('خطأ في الاتصال');
+            }
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const originalContent = document.getElementById('contractContent');
+
+            const downloadBtn = document.querySelector('[onclick="downloadPDF()"]');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = 'جاري التحميل...';
+            downloadBtn.disabled = true;
+
+            // Create clone
+            const clone = originalContent.cloneNode(true);
+
+            // Layout optimized for A4
+            clone.style.width = '794px';
+            clone.style.maxWidth = '794px';
+            clone.style.position = 'absolute';
+            clone.style.left = '-9999px';
+            clone.style.top = '0';
+            clone.style.background = '#ffffff';
+            clone.style.margin = '0';
+            clone.style.padding = '30px 40px'; // Moderate padding
+
+            // Logo sizing
+            const logos = clone.querySelectorAll('.pdf-header img');
+            if (logos.length >= 3) {
+                logos[0].style.width = '160px';
+                logos[0].style.height = 'auto';
+                logos[1].style.width = '90px';
+                logos[1].style.height = 'auto';
+                logos[2].style.width = '60px';
+                logos[2].style.height = 'auto';
+            }
+
+            // Content spacing reduction
+            clone.style.fontSize = '14px';
+            const headers = clone.querySelectorAll('h1, h2, h3');
+            headers.forEach(h => h.style.marginBottom = '10px');
+
+            const sigGrid = clone.querySelector('.signatures-grid');
+            if (sigGrid) {
+                sigGrid.style.marginTop = '20px';
+                sigGrid.style.gap = '20px';
+            }
+
+            document.body.appendChild(clone);
+
+            html2canvas(clone, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                imageTimeout: 0,
+                windowWidth: 794
+            }).then(canvas => {
+                document.body.removeChild(clone);
+
+                try {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+
+                    const pdfPageWidth = pdf.internal.pageSize.getWidth();
+                    const pdfPageHeight = pdf.internal.pageSize.getHeight();
+
+                    // Calculate image dimensions
+                    const imgWidth = pdfPageWidth;
+                    const imgHeight = (canvas.height * pdfPageWidth) / canvas.width;
+
+                    // SCALE TO FIT LOGIC:
+                    // If image is taller than page, scale it down to fit height
+                    if (imgHeight > pdfPageHeight) {
+                        const scaleFactor = pdfPageHeight / imgHeight;
+                        const scaledWidth = imgWidth * scaleFactor;
+                        const scaledHeight = imgHeight * scaleFactor;
+
+                        // Center horizontally
+                        const xOffset = (pdfPageWidth - scaledWidth) / 2;
+
+                        pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, scaledHeight);
+                    } else {
+                        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    }
+
+                    pdf.save(`عقد_توريد_${CONTRACT_ID}.pdf`);
+                    showToast('تم تحميل ملف PDF بنجاح');
+                } catch (e) {
+                    console.error('PDF Error:', e);
+                    alert('حدث خطأ في إنشاء ملف PDF');
+                }
+
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }).catch(err => {
+                if (document.body.contains(clone)) document.body.removeChild(clone);
+                console.error('html2canvas Error:', err);
+                alert('حدث خطأ في معالجة الصفحة');
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+
+</html>

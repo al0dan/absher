@@ -1,0 +1,307 @@
+/* =========================================
+   FONTS — DIN Next Arabic
+========================================= */
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC ULTRALIGHT.otf') format('opentype');
+    font-weight: 200;
+}
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC LIGHT.otf') format('opentype');
+    font-weight: 300;
+}
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC REGULAR.otf') format('opentype');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC MEDIUM.otf') format('opentype');
+    font-weight: 500;
+}
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC BOLD.otf') format('opentype');
+    font-weight: 700;
+}
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC HEAVY.otf') format('opentype');
+    font-weight: 800;
+}
+@font-face {
+    font-family: 'DINNextArabic';
+    src: url('../fonts/DIN NEXT™ ARABIC BLACK.otf') format('opentype');
+    font-weight: 900;
+}
+
+/* =========================================
+   GLOBAL RESET
+========================================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'DINNextArabic', sans-serif;
+    background: #fff;
+    color: #333;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+.top-header {
+    width: 100%;
+    background-image: url("../img/Grid_colored.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 25px 0;
+}
+
+.top-header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left .logo-absher {
+    height: 85px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-right img {
+    height: 55px;
+}
+
+.header-center .lang-switch {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    color: #008850;
+    font-weight: 600;
+    text-decoration: none;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.header-center .globe {
+    width: 22px;
+}
+
+/* =========================================
+   LOGIN PAGE LAYOUT
+========================================= */
+.login-layout {
+    position: absolute;
+z-index: 10;
+
+    gap: 40px;
+    align-items: center;
+    padding: 40px 80px;
+    margin-top: 20px;
+}
+
+/* =========================================
+   LOGIN CARD
+========================================= */
+.login-card {
+    background: #fff;
+    padding: 35px 30px;
+    border-radius: 18px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 430px;
+    justify-self: end;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.login-card label {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 14px;
+}
+
+.input-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+    background: #f4f7fb;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 15px;
+}
+.page-title h1 {
+    text-align: right ;
+    margin-top: 40px;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.forgot {
+    display: inline-block;
+    color: #0a66c2;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.login-btn {
+  font-family: 'DINNextArabic', sans-serif;
+    width: 100%;
+    background: #0058a3;
+    color: #fff;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+.services {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 95%;
+    margin: auto;
+}
+
+.new-user {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    color: #006cbe;
+}
+
+/* =========================================
+   HERO SLIDER
+========================================= */
+.hero-slider {
+    width: 100%;
+    position: relative;
+}
+
+.slider-container {
+    width: 100%;
+    height: 430px;
+
+    overflow: hidden;
+    position: relative;
+}
+
+.slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.9s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slider-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 60px;
+    background: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 21px;
+    opacity: 0.9;
+}
+
+.slider-btn.prev {
+    right: 110px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 992px) {
+    .login-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .login-card {
+        justify-self: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .top-header-inner {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .header-left .logo-absher {
+        height: 70px;
+    }
+}
+/* الغلاف الرئيسي */
+.login-wrapper {
+    width: 100%;
+    position: relative;
+    margin-top: 20px;
+}
+
+/* السلايدر بعرض الشاشة */
+.hero-slider {
+    width: 100%;
+}
+
+.slider-container {
+    width: 100%;
+    height: 480px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* النموذج فوق السلايدر */
+.login-card-overlay {
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    transform: translateY(-50%);
+    z-index: 15;
+}
+
+/* بطاقة التسجيل */
+.login-card {
+    width: 420px;
+    background: #fff;
+    padding: 35px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}

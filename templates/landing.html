@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ar" class="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <title>أبشر - الرئيسية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+
+    <!-- شريط التحذير -->
+    <div class="warning-banner">
+        إخلاء مسؤولية: هذه الصفحة نسخة تجريبية غير رسمية، ولا تحتوي على أي خدمات حقيقية، ولا ترتبط بمنصة أبشر أو
+        وزارة الداخلية. المحتوى هنا لغرض العرض والاختبار فقط.
+    </div>
+
+    <!-- الهيدر الخلفية -->
+    <header class="top-header">
+
+        <div class="top-header-inner">
+            <!-- يسار: شعار أبشر -->
+            <div class="header-left">
+                <img src="/img/Absher_indvidual_logo.svg" alt="Absher" class="logo-absher">
+            </div>
+
+            <!-- يمين: رؤية 2030 + الداخلية -->
+            <div class="header-right">
+                <!-- الوسط: اللغة -->
+                <div class="header-center">
+                    <a id="switchLang" href="javascript:void(0);" class="lang-switch" style="color: #000;;">
+                        <span class="ar-text">English</span>
+                        <span class="en-text">العربية</span>
+                        <img src="/img/globe.svg" class="globe">
+                    </a>
+                </div>
+                <img src="/img/vission-logo.png" alt="Vision 2030" class="logo-2030">
+                <img src="/img/moi-logo.svg" alt="MOI" class="logo-moi">
+
+
+            </div>
+
+
+
+
+
+
+
+        </div>
+
+    </header>
+
+
+    <!-- المحتوى الرئيسي -->
+    <main class="container">
+        <div id="mid-content">
+
+            <!-- النص الترحيبي -->
+            <div class="top-text">
+                <h1 class="ar-text">أهلاً بكم في أبشر</h1>
+                <h1 class="en-text">Welcome to Absher</h1>
+
+                <p class="ar-text">
+                    المنصة الإلكترونية لخدمات وزارة الداخلية وقطاعاتها، لخدمة المواطنين والمقيمين والزوار.
+                </p>
+
+                <p class="en-text">
+                    The electronic platform for the Ministry of Interior services.
+                </p>
+            </div>
+
+            <!-- الكروت -->
+            <div class="cards-container">
+
+                <!-- أفراد -->
+                <a class="card-item card-indi" href="/login">
+                    <div class="card-contents">
+                        <div class="card-logo">
+                            <img src="/img/Absher_indvidual_logo.svg" class="logoIcon" alt="">
+                        </div>
+                        <div class="card-text">
+                            <h2 class="ar-text">أبشر أفراد</h2>
+                            <h2 class="en-text">Absher Individuals</h2>
+                            <p class="ar-text">خدمات المواطنين والمقيمين والزوار</p>
+                            <p class="en-text">Services for citizens, residents and visitors</p>
+
+                            <div class="go-link ar-text">
+                                <span>دخول</span>
+                                <img src="/img/arrow.svg" class="arrow" alt="">
+                            </div>
+                            <div class="go-link en-text">
+                                <span>Login</span>
+                                <img src="/img/arrow.svg" class="arrow" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- أعمال -->
+                <a class="card-item card-busi" href="/login">
+                    <div class="card-contents">
+                        <div class="card-logo">
+                            <img src="/img/Absher_Business_logo.svg" class="logoIcon" alt="">
+                        </div>
+                        <div class="card-text">
+                            <h2 class="ar-text">أبشر أعمال</h2>
+                            <h2 class="en-text">Absher Business</h2>
+                            <p class="ar-text">خدمات المنشآت وأصحاب الأعمال</p>
+                            <p class="en-text">Business services</p>
+
+                            <div class="go-link ar-text">
+                                <span>دخول</span>
+                                <img src="/img/arrow.svg" class="arrow" alt="">
+                            </div>
+                            <div class="go-link en-text">
+                                <span>Login</span>
+                                <img src="/img/arrow.svg" class="arrow" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- حكومة -->
+                <a class="card-item card-gov" href="#">
+                    <div class="card-contents">
+                        <div class="card-logo">
+                            <img src="/img/Absher_Government_logo.svg" class="logoIcon" alt="">
+                        </div>
+                        <div class="card-text">
+                            <h2 class="ar-text">أبشر حكومة</h2>
+                            <h2 class="en-text">Absher Government</h2>
+                            <p class="ar-text">خدمات منسوبي القطاع الحكومي</p>
+                            <p class="en-text">Government employees services</p>
+
+                            <div class="go-link ar-text">
+                                <span>دخول</span>
+                                <img src="/img/arrow.svg" class="arrow" alt="">
+                            </div>
+                            <div class="go-link en-text">
+                                <span>Login</span>
+                                <img src="/img/arrow.svg" class="arrow" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JS بسيط لتبديل اللغة -->
+    <script>
+        const switchLang = document.getElementById('switchLang');
+        switchLang.addEventListener('click', () => {
+            const html = document.documentElement;
+            if (html.lang === 'ar') {
+                html.lang = 'en';
+                html.classList.remove('rtl');
+                html.classList.add('ltr');
+            } else {
+                html.lang = 'ar';
+                html.classList.remove('ltr');
+                html.classList.add('rtl');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
