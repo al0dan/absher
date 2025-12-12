@@ -235,6 +235,8 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
         <div class="contract-id">#{contract_data.get('id', 'N/A')}</div>
     </div>
     
+    <div class="contract-body">{contract_data.get('contract_text', 'لا يوجد نص محدد للعقد.')}</div>
+    
     <div class="parties-grid">
         <div class="party-card">
             <div class="party-title">الطرف الأول (المورد)</div>
@@ -250,8 +252,6 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             <div class="party-info"><strong>الرقم الضريبي:</strong> {contract_data.get('buyer_vat', 'N/A')}</div>
         </div>
     </div>
-    
-    <div class="contract-body">{contract_data.get('contract_text', 'لا يوجد نص محدد للعقد.')}</div>
     
     <div class="signatures-section">
         <div class="signature-block">
