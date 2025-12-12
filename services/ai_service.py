@@ -194,7 +194,7 @@ def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
                         {'role': 'user', 'content': prompt_user}
                     ],
                     'temperature': 0.3,
-                    'max_tokens': 800  # Reduced to prevent ALLaM repetition
+                    'max_tokens': 600  # Reduced for single-page contracts
                 },
                 timeout=60
             )
@@ -400,8 +400,10 @@ def generate_contract_ai(supplier: str, buyer: str, items: str, price: str, cont
 - اختم بـ "والله ولي التوفيق" ثم "التوقيعات:" وخانتين للتوقيع للطرفين.
 
 قيود:
+- لا تستخدم أقواس مربعة [] أو عبارات مثل "[الكمية المحددة]" أو "[السعر المحدد]" - اكتب القيم الفعلية مباشرة.
 - لا تذكر عبارات مثل "[ملاحظات AI]" أو "--- التفاصيل التعاقدية ---" ولا تنسخها حرفياً.
 - لا تكتب شهادات أو مرفقات أو ملاحظات ختامية خارج نطاق العقد.
+- اكتب عقداً مختصراً في صفحة واحدة فقط (5-6 مواد كافية).
 
 المرجع القانوني: نظام المعاملات المدنية السعودي (م/191)
 '''
