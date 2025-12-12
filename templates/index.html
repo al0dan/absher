@@ -222,21 +222,21 @@
         </div>
     </header>
 
-    <main class="absher-form-section" style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
+    <main class="absher-form-section" style="max-width: 1300px; margin: 30px auto; padding: 0 25px;">
 
         <!-- Welcome & Breadcrumb -->
         <div
             style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
             <div>
                 <div style="font-size: 12px; color: #888; margin-bottom: 8px;">الرئيسية > مركز القيادة</div>
-                <h1 style="margin: 0; font-size: 24px; color: var(--business-theme-color);">أهلاً بك، {{ user.name }}
+                <h1 style="margin: 0; font-size: 26px; color: var(--business-theme-color);">أهلاً بك، {{ user.name }}
                 </h1>
             </div>
             <div style="text-align: left;">
-                <div style="font-size: 11px; color: #888;">حالة الحساب</div>
+                <div style="font-size: 12px; color: #888;">حالة الحساب</div>
                 <div
-                    style="color: #2e7d32; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 14px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    style="color: #2e7d32; font-weight: bold; display: flex; align-items: center; gap: 6px; font-size: 15px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
                         viewBox="0 0 16 16">
                         <path
                             d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
@@ -246,143 +246,73 @@
             </div>
         </div>
 
-        <div class="dashboard-grid">
-
-            <!-- RIGHT COLUMN (Main Content) -->
-            <div>
-                <!-- Action Center -->
-                {% if actions_required %}
-                <div class="dash-card" style="border-top: 3px solid #ffbd2e;">
-                    <div class="dash-header" style="border-bottom: none; padding-bottom: 0;">
-                        <div class="dash-title" style="color: #d68f00;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            إجراءات تتطلب انتباهك
-                        </div>
-                    </div>
-                    {% for action in actions_required %}
-                    <div class="action-item">
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <div style="background: #fff; padding: 5px; border-radius: 4px; border: 1px solid #eee;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
-                                    viewBox="0 0 24 24" stroke="#ffbd2e">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <div style="font-weight: bold; font-size: 14px;">عقد بانتظار التوقيع #{{ action.id }}
-                                </div>
-                                <div style="font-size: 11px; color: #666;">الطرف الآخر: {{ action.buyer if
-                                    action.supplier_cr == user.cr else action.supplier }}</div>
-                            </div>
-                        </div>
-                        <a href="/contract/{{ action.id }}" class="btn-absher"
-                            style="padding: 6px 20px; font-size: 12px; margin: 0;">توقيع</a>
-                    </div>
-                    {% endfor %}
+        <!-- 1. ALERT BAR (Full Width) -->
+        {% if actions_required %}
+        <div class="dash-card"
+            style="border: 1px solid #ffcc80; background: #fff3e0; border-right: 5px solid #ef6c00; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div
+                    style="background: #fff; padding: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"
+                        stroke="#ef6c00" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                 </div>
-                {% endif %}
+                <div>
+                    <h3 style="margin: 0 0 5px 0; font-size: 18px; color: #d65c00;">إجراء مطلوب: توقيع عقد</h3>
+                    <p style="margin: 0; font-size: 14px; color: #5d4037;">لديك <strong>{{ actions_required|length
+                            }}</strong> عقد بانتظار توقيعك. يرجى إتمام الإجراء لتفعيل العقد.</p>
+                </div>
+            </div>
+            <div>
+                {% for action in actions_required[:1] %}
+                <a href="/contract/{{ action.id }}" class="btn-absher"
+                    style="background: #ef6c00; border: none; padding: 10px 30px; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 108, 0, 0.2);">توقيع
+                    الآن</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
-                <!-- Financial Overview -->
-                <div class="dash-card">
+        <!-- 2. MAIN GRID -->
+        <div class="dashboard-grid" style="grid-template-columns: 2.5fr 1fr; gap: 30px;">
+
+            <!-- LEFT COLUMN (Main Content) -->
+            <div>
+
+                <!-- Financial Stats Row -->
+                <div class="dash-card" style="padding: 25px;">
                     <div class="analytics-row">
                         <div class="stat-box">
-                            <div style="font-size: 12px; color: #777; margin-bottom: 5px;">إجمالي قيمة العقود</div>
-                            <div style="font-size: 28px; font-weight: 700; color: var(--business-theme-color);">{{
+                            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">إجمالي قيمة العقود</div>
+                            <div style="font-size: 32px; font-weight: 800; color: var(--business-theme-color);">{{
                                 "{:,.2f}".format(total_value) }} <span
-                                    style="font-size: 14px; font-weight: normal; color: #666;">ر.س</span></div>
+                                    style="font-size: 16px; font-weight: 500; color: #888;">ر.س</span></div>
                         </div>
-                        <div class="stat-box" style="border-right: 1px solid #eee; padding-right: 20px;">
-                            <div style="font-size: 12px; color: #777; margin-bottom: 5px;">العقود النشطة</div>
-                            <div style="font-size: 28px; font-weight: 700; color: #333;">{{ status_stats.signed }}</div>
+                        <div class="stat-box" style="border-right: 1px solid #eee; padding-right: 30px;">
+                            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">العقود النشطة</div>
+                            <div style="font-size: 32px; font-weight: 800; color: #333;">{{ status_stats.signed }}</div>
                         </div>
-                        <div class="stat-box" style="border-right: 1px solid #eee; padding-right: 20px;">
-                            <div style="font-size: 12px; color: #777; margin-bottom: 5px;">قيد الانتظار</div>
-                            <div style="font-size: 28px; font-weight: 700; color: #ef6c00;">{{ status_stats.pending }}
+                        <div class="stat-box" style="border-right: 1px solid #eee; padding-right: 30px;">
+                            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">تحت الإجراء</div>
+                            <div style="font-size: 32px; font-weight: 800; color: #ef6c00;">{{ status_stats.pending }}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Contracts -->
-                <div class="dash-card" style="padding: 0;">
-                    <div class="dash-header" style="margin: 20px 20px 10px 20px;">
-                        <div class="dash-title">أحدث العقود</div>
-                        <a href="#" style="font-size: 12px; color: var(--business-theme-color);">عرض الأرشيف</a>
-                    </div>
-                    <table class="absher-table">
-                        <thead>
-                            <tr>
-                                <th>رقم العقد</th>
-                                <th>الطرف الثاني</th>
-                                <th>القيمة</th>
-                                <th>النوع</th>
-                                <th>الحالة</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for c in contracts[:5] %}
-                            <tr>
-                                <td style="font-weight: bold; font-family: monospace;">#{{ c.id }}</td>
-                                <td>{{ c.buyer }}</td>
-                                <td>{{ c.price }}</td>
-                                <td>
-                                    <!-- Icons instead of Emojis -->
-                                    {% if c.contract_type == 'supply' %}
-                                    <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg> توريد
-                                    {% elif c.contract_type == 'service' %}
-                                    <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path
-                                            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                                    </svg> خدمات
-                                    {% elif c.contract_type == 'nda' %}
-                                    <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg> NDA
-                                    {% else %}
-                                    <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg> عام
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.signed_by_supplier and c.signed_by_buyer %}
-                                    <span class="status-badge bg-green">مكتمل</span>
-                                    {% else %}
-                                    <span class="status-badge bg-orange">قيد الإجراء</span>
-                                    {% endif %}
-                                </td>
-                                <td><a href="/contract/{{ c.id }}"
-                                        style="color: var(--business-theme-color); font-size: 12px; font-weight: bold;">عرض</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            {% if not contracts %}
-                            <tr>
-                                <td colspan="6" style="text-align: center; padding: 30px; color: #999;">لا توجد تعاملات
-                                    حديثة</td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Quick Access Bottom -->
-                <h3 style="color: #444; margin-bottom: 15px; font-size: 18px;">الخدمات السريعة</h3>
-                <div class="quick-actions">
+                <!-- Quick Services (High Visibility) -->
+                <h3
+                    style="color: #444; margin: 30px 0 15px; font-size: 18px; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    الوصول السريع
+                </h3>
+                <div class="quick-actions" style="margin-bottom: 30px;">
                     <a href="/create?type=supply" class="action-btn">
                         <svg class="action-icon-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -417,32 +347,122 @@
                         <div>عقد إيجار</div>
                     </a>
                 </div>
+
+                <!-- Recent Contracts Table -->
+                <div class="dash-card"
+                    style="padding: 0; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div class="dash-header" style="margin: 20px 25px 15px 25px; border-bottom: none;">
+                        <div class="dash-title" style="font-size: 18px;">المعاملات الأخيرة</div>
+                        <a href="#" style="font-size: 13px; color: var(--business-theme-color); font-weight: 600;">عرض
+                            الأرشيف</a>
+                    </div>
+                    <table class="absher-table">
+                        <thead>
+                            <tr style="background: #fcfcfc;">
+                                <th style="padding: 15px 25px;">رقم العقد</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>الطرف الثاني</th>
+                                <th>القيمة</th>
+                                <th>النوع</th>
+                                <th>الحالة</th>
+                                <th style="padding: 15px 25px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contracts[:5] %}
+                            <tr style="transition: background 0.2s;" onmouseover="this.style.background='#fbfbfb'"
+                                onmouseout="this.style.background='white'">
+                                <td style="padding: 18px 25px; font-weight: bold; font-family: monospace; color: #555;">
+                                    #{{ c.id }}</td>
+                                <td style="color: #666; font-size: 13px;">12/12/2025</td> <!-- Demo Date -->
+                                <td style="font-weight: 500;">{{ c.buyer }}</td>
+                                <td style="font-weight: bold;">{{ "{:,.2f}".format(c.price) }}</td>
+                                <td>
+                                    {% if c.contract_type == 'supply' %}
+                                    <span
+                                        style="display:inline-flex; align-items:center; gap:5px; background:#e0f7fa; color:#006064; padding:4px 8px; border-radius:4px; font-size:12px;">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg> توريد
+                                    </span>
+                                    {% elif c.contract_type == 'service' %}
+                                    <span
+                                        style="display:inline-flex; align-items:center; gap:5px; background:#e8f5e9; color:#1b5e20; padding:4px 8px; border-radius:4px; font-size:12px;">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg> خدمات
+                                    </span>
+                                    {% elif c.contract_type == 'nda' %}
+                                    <span
+                                        style="display:inline-flex; align-items:center; gap:5px; background:#fff8e1; color:#ff6f00; padding:4px 8px; border-radius:4px; font-size:12px;">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg> NDA
+                                    </span>
+                                    {% else %}
+                                    عام
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if c.signed_by_supplier and c.signed_by_buyer %}
+                                    <span class="status-badge bg-green">مكتمل</span>
+                                    {% else %}
+                                    <span class="status-badge bg-orange">قيد الإجراء</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 15px 25px;">
+                                    <a href="/contract/{{ c.id }}"
+                                        style="display: inline-block; padding: 8px 15px; border: 1px solid #ddd; border-radius: 6px; color: #444; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.2s;">
+                                        عرض
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not contracts %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #999;">لا توجد تعاملات
+                                    حديثة. ابدأ بإنشاء عقد جديد.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
 
-            <!-- LEFT COLUMN (Sidebar) -->
+            <!-- RIGHT COLUMN (Sidebar) -->
             <div>
-                <!-- Create New - Polished -->
+                <!-- Create New - Prominent -->
                 <div class="dash-card"
-                    style="background: linear-gradient(145deg, var(--business-theme-color) 0%, #155e96 100%); color: white; border: none; padding: 25px;">
-                    <h3 style="margin-top: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">إنشاء عقد جديد
-                    </h3>
-                    <p style="font-size: 14px; opacity: 0.95; margin-bottom: 25px; line-height: 1.6;">وثّق تعاملاتك
-                        التجارية الآن بموثوقية وحماية قانونية كاملة.</p>
+                    style="background: linear-gradient(145deg, var(--business-theme-color) 0%, #104a75 100%); color: white; border: none; padding: 30px 25px; box-shadow: 0 10px 30px rgba(0, 84, 131, 0.2);">
+                    <h3
+                        style="margin-top: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px;">
+                        إنشاء عقد جديد</h3>
+                    <p style="font-size: 14px; opacity: 0.9; margin-bottom: 30px; line-height: 1.6;">وثّق تعاملاتك
+                        التجارية الآن بموثوقية وحماية قانونية.</p>
                     <a href="/create" class="btn-absher"
-                        style="background: white; color: var(--business-theme-color); width: 100%; display: block; text-align: center; border: none; font-weight: 800; font-size: 16px;">+
+                        style="background: white; color: var(--business-theme-color); width: 100%; display: block; text-align: center; border: none; font-weight: 800; font-size: 16px; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">+
                         إنشاء عقد الآن</a>
                 </div>
 
-                <!-- Visuals -->
+                <!-- Visuals - Muted Colors -->
                 <div class="dash-card">
-                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px;">توزيع العقود</div>
+                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px; color: #666;">توزيع العقود
+                    </div>
                     <div class="chart-container" style="height: 180px;">
                         <canvas id="typeChart"></canvas>
                     </div>
                 </div>
 
                 <div class="dash-card">
-                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px;">حالة التوقيع</div>
+                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px; color: #666;">حالة التوقيع
+                    </div>
                     <div class="chart-container" style="height: 180px;">
                         <canvas id="statusChart"></canvas>
                     </div>
@@ -520,7 +540,7 @@
     </footer>
 
     <script>
-        // Charts Data
+        // Charts Data - Muted Colors
         const typeData = {{ type_stats| tojson }};
         const statusData = {{ status_stats| tojson }};
 
@@ -531,26 +551,29 @@
                 labels: ['توريد', 'خدمات', 'NDA', 'عام'],
                 datasets: [{
                     data: [typeData.supply, typeData.service, typeData.nda, (typeData.rental + (typeData.general || 0))],
-                    backgroundColor: ['#00838f', '#00bfa5', '#ffa000', '#5d4037'],
+                    // Muted Palette: Teal, Blue-Grey, Amber, Brown
+                    backgroundColor: ['#4db6ac', '#90a4ae', '#ffd54f', '#a1887f'],
                     borderWidth: 0,
-                    cutout: '75%'
+                    cutout: '70%'
                 }]
             },
             options: {
-                plugins: { legend: { display: false } }, // Minimal look
+                plugins: { legend: { display: false } },
                 maintainAspectRatio: false
             }
         });
 
-        // Status Chart
+        // Status Chart - De-emphasized
         new Chart(document.getElementById('statusChart'), {
-            type: 'pie',
+            type: 'doughnut', // Switch to doughnut for less visual weight
             data: {
                 labels: ['مكتمل', 'معلق'],
                 datasets: [{
                     data: [statusData.signed, statusData.pending],
-                    backgroundColor: ['#2e7d32', '#ef6c00'],
-                    borderWidth: 0
+                    // Muted Green, Muted Orange
+                    backgroundColor: ['#81c784', '#ffb74d'],
+                    borderWidth: 0,
+                    cutout: '60%'
                 }]
             },
             options: {
