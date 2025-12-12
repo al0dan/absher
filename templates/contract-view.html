@@ -219,7 +219,7 @@
                     {% else %}
                     {% if view_role == 'supplier' %}
                     <div style="margin-bottom: 10px; font-size: 14px;">الرجاء التوقيع أدناه:</div>
-                    <canvas id="supplierCanvas" width="300" height="150" class="signature-pad"></canvas>
+                    <canvas id="supplierCanvas" width="400" height="200" class="signature-pad"></canvas>
                     <input type="text" id="supplierName" class="form-control" placeholder="الاسم الكامل"
                         style="margin-bottom: 10px;" value="{{ contract.supplier }}">
                     <div style="display: flex; gap: 5px; justify-content: center;">
@@ -260,7 +260,7 @@
                     {% else %}
                     {% if view_role == 'buyer' %}
                     <div style="margin-bottom: 10px; font-size: 14px;">الرجاء التوقيع أدناه:</div>
-                    <canvas id="buyerCanvas" width="300" height="150" class="signature-pad"></canvas>
+                    <canvas id="buyerCanvas" width="400" height="200" class="signature-pad"></canvas>
                     <input type="text" id="buyerName" class="form-control" placeholder="الاسم الكامل"
                         style="margin-bottom: 10px;" value="{{ contract.buyer }}">
                     <div style="display: flex; gap: 5px; justify-content: center;">

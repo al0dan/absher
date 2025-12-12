@@ -73,7 +73,11 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
 <head>
     <meta charset="UTF-8">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+        /* Use system fonts with Arabic fallback - more reliable for PDF */
+        @page {{
+            size: A4;
+            margin: 15mm;
+        }}
         
         :root {{
             --business-theme-color: #3D80C1;
@@ -81,7 +85,7 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
         }}
 
         * {{
-            font-family: 'Noto Sans Arabic', sans-serif;
+            font-family: 'Noto Sans Arabic', 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
             box-sizing: border-box;
         }}
         
