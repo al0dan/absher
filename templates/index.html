@@ -248,27 +248,27 @@
 
         <!-- 1. ALERT BAR (Full Width) -->
         {% if actions_required %}
-        <div class="dash-card"
-            style="border: 1px solid #ffcc80; background: #fff3e0; border-right: 5px solid #ef6c00; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div class="dash-card alert-banner"
+            style="border: 1px solid #ffe082; background: #fff8e1; border-right: 5px solid #ffca28; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div
                     style="background: #fff; padding: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"
-                        stroke="#ef6c00" stroke-width="2">
+                        stroke="#f57f17" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
                 <div>
-                    <h3 style="margin: 0 0 5px 0; font-size: 18px; color: #d65c00;">إجراء مطلوب: توقيع عقد</h3>
+                    <h3 style="margin: 0 0 5px 0; font-size: 18px; color: #e65100;">إجراء مطلوب: توقيع عقد</h3>
                     <p style="margin: 0; font-size: 14px; color: #5d4037;">لديك <strong>{{ actions_required|length
-                            }}</strong> عقد بانتظار توقيعك. يرجى إتمام الإجراء لتفعيل العقد.</p>
+                            }}</strong> عقد بانتظار توقيعك.</p>
                 </div>
             </div>
-            <div>
+            <div style="padding-left: 10px;">
                 {% for action in actions_required[:1] %}
                 <a href="/contract/{{ action.id }}" class="btn-absher"
-                    style="background: #ef6c00; border: none; padding: 10px 30px; font-size: 14px; box-shadow: 0 4px 12px rgba(239, 108, 0, 0.2);">توقيع
+                    style="background: #ef6c00; border: none; padding: 10px 40px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 12px rgba(239, 108, 0, 0.2);">توقيع
                     الآن</a>
                 {% endfor %}
             </div>
@@ -296,7 +296,7 @@
                         </div>
                         <div class="stat-box" style="border-right: 1px solid #eee; padding-right: 30px;">
                             <div style="font-size: 13px; color: #666; margin-bottom: 8px;">تحت الإجراء</div>
-                            <div style="font-size: 32px; font-weight: 800; color: #ef6c00;">{{ status_stats.pending }}
+                            <div style="font-size: 32px; font-weight: 800; color: #f57f17;">{{ status_stats.pending }}
                             </div>
                         </div>
                     </div>
@@ -451,7 +451,8 @@
                         إنشاء عقد الآن</a>
                 </div>
 
-                <!-- Visuals - Muted Colors -->
+                <!-- Visuals - CONDITIONAL -->
+                {% if contracts|length >= 5 %}
                 <div class="dash-card">
                     <div class="dash-title" style="font-size: 14px; margin-bottom: 15px; color: #666;">توزيع العقود
                     </div>
@@ -467,6 +468,29 @@
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
+                {% else %}
+                <!-- Simple Text Stats for Hackathon Demo Mode -->
+                <div class="dash-card">
+                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px; color: #666;">ملخص العقود</div>
+                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px;">
+                        <li
+                            style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0;">
+                            <span>توريد</span> <span style="font-weight: bold;">{{ type_stats.supply }}</span>
+                        </li>
+                        <li
+                            style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0;">
+                            <span>خدمات</span> <span style="font-weight: bold;">{{ type_stats.service }}</span>
+                        </li>
+                        <li
+                            style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0;">
+                            <span>NDA</span> <span style="font-weight: bold;">{{ type_stats.nda }}</span>
+                        </li>
+                        <li style="display: flex; justify-content: space-between; padding: 10px 0;">
+                            <span>إيجار</span> <span style="font-weight: bold;">{{ type_stats.rental }}</span>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
             </div>
 
         </div>
@@ -544,43 +568,48 @@
         const typeData = {{ type_stats| tojson }};
         const statusData = {{ status_stats| tojson }};
 
-        // Type Chart
-        new Chart(document.getElementById('typeChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['توريد', 'خدمات', 'NDA', 'عام'],
-                datasets: [{
-                    data: [typeData.supply, typeData.service, typeData.nda, (typeData.rental + (typeData.general || 0))],
-                    // Muted Palette: Teal, Blue-Grey, Amber, Brown
-                    backgroundColor: ['#4db6ac', '#90a4ae', '#ffd54f', '#a1887f'],
-                    borderWidth: 0,
-                    cutout: '70%'
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                maintainAspectRatio: false
-            }
-        });
+        // Protected Charts Init
+        const typeChartCtx = document.getElementById('typeChart');
+        if (typeChartCtx) {
+            new Chart(typeChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['توريد', 'خدمات', 'NDA', 'عام'],
+                    datasets: [{
+                        data: [typeData.supply, typeData.service, typeData.nda, (typeData.rental + (typeData.general || 0))],
+                        // Muted Palette: Teal, Blue-Grey, Amber, Brown
+                        backgroundColor: ['#4db6ac', '#90a4ae', '#ffd54f', '#a1887f'],
+                        borderWidth: 0,
+                        cutout: '70%'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    maintainAspectRatio: false
+                }
+            });
+        }
 
-        // Status Chart - De-emphasized
-        new Chart(document.getElementById('statusChart'), {
-            type: 'doughnut', // Switch to doughnut for less visual weight
-            data: {
-                labels: ['مكتمل', 'معلق'],
-                datasets: [{
-                    data: [statusData.signed, statusData.pending],
-                    // Muted Green, Muted Orange
-                    backgroundColor: ['#81c784', '#ffb74d'],
-                    borderWidth: 0,
-                    cutout: '60%'
-                }]
-            },
-            options: {
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true, font: { size: 12, family: "'DINNextArabic', sans-serif" } } } },
-                maintainAspectRatio: false
-            }
-        });
+        const statusChartCtx = document.getElementById('statusChart');
+        if (statusChartCtx) {
+            new Chart(statusChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مكتمل', 'معلق'],
+                    datasets: [{
+                        data: [statusData.signed, statusData.pending],
+                        // Muted Green, Muted Orange
+                        backgroundColor: ['#81c784', '#ffb74d'],
+                        borderWidth: 0,
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true, font: { size: 12, family: "'DINNextArabic', sans-serif" } } } },
+                    maintainAspectRatio: false
+                }
+            });
+        }
 
         // Lang Switch logic
         const switchLang = document.getElementById('switchLang');

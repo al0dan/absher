@@ -169,6 +169,37 @@ body {
     }
 }
 
+/* Hackathon Polish */
+.action-btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: var(--business-theme-color);
+}
+
+.status-badge.bg-orange {
+    background-color: #fff8e1 !important;
+    color: #f57f17 !important;
+    /* Amber for Pending */
+}
+
+.status-badge.bg-green {
+    background-color: #e8f5e9 !important;
+    color: #2e7d32 !important;
+}
+
+.alert-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    direction: rtl;
+    /* Force RTL layout */
+}
+
 .rtl {
     direction: rtl;
 }
