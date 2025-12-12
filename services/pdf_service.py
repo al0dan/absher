@@ -67,16 +67,30 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
     logo_absher = get_image_base64("img/Absher_Business_logo.svg")
     logo_vision = get_image_base64("img/vission-logo.png")
     logo_moi = get_image_base64("img/moi-logo.svg")
+    # Get base directory for font paths
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    font_dir = os.path.join(base_dir, 'fonts')
     
     html = f'''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <style>
-        /* Use system fonts with Arabic fallback - more reliable for PDF */
+        /* Local fonts for PDF rendering */
+        @font-face {{
+            font-family: 'DIN';
+            src: url('file://{font_dir}/DIN NEXT™ ARABIC REGULAR.otf') format('opentype');
+            font-weight: 400;
+        }}
+        @font-face {{
+            font-family: 'DIN';
+            src: url('file://{font_dir}/DIN NEXT™ ARABIC BOLD.otf') format('opentype');
+            font-weight: 700;
+        }}
+        
         @page {{
             size: A4;
-            margin: 15mm;
+            margin: 12mm;
         }}
         
         :root {{
@@ -85,15 +99,17 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
         }}
 
         * {{
-            font-family: 'Noto Sans Arabic', 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+            font-family: 'DIN', 'Noto Sans Arabic', 'Segoe UI', 'Arial', sans-serif;
             box-sizing: border-box;
         }}
         
         body {{
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             direction: rtl;
             color: #333;
+            font-size: 11px;
+            line-height: 1.5;
         }}
         
         .pdf-header {{
