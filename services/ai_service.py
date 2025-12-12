@@ -15,20 +15,24 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# API Keys
-HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
-GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-KIMI_API_KEY = os.getenv('KIMI_API_KEY')
-
 # ALLaM-2-7B is available directly on Groq (SDAIA's sovereign Arabic AI)
 ALLAM_MODEL_GROQ = "allam-2-7b"  # SDAIA ALLaM on Groq
 ALLAM_MODEL_HF = "sdaia/allam-1-7b-instruct"  # HuggingFace backup
 GROQ_FALLBACK_MODEL = "llama-3.3-70b-versatile"  # Fallback if ALLaM fails
 
 
+def _get_env(name: str) -> str | None:
+    value = os.getenv(name)
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
+
+
 def generate_with_allam_hf(prompt_system: str, prompt_user: str) -> str:
     """Generate contract using ALLaM via Hugging Face Inference API."""
-    if not HUGGINGFACE_API_KEY:
+    huggingface_api_key = _get_env('HUGGINGFACE_API_KEY')
+    if not huggingface_api_key:
         raise ValueError("HUGGINGFACE_API_KEY not set")
     
     # Format prompt for instruction-tuned model
@@ -40,8 +44,8 @@ def generate_with_allam_hf(prompt_system: str, prompt_user: str) -> str:
     
     start_time = time.time()
     response = requests.post(
-        f"https://api-inference.huggingface.co/models/{ALLAM_MODEL}",
-        headers={"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"},
+        f"https://api-inference.huggingface.co/models/{ALLAM_MODEL_HF}",
+        headers={"Authorization": f"Bearer {huggingface_api_key}"},
         json={
             "inputs": full_prompt,
             "parameters": {
@@ -68,95 +72,115 @@ def generate_with_allam_hf(prompt_system: str, prompt_user: str) -> str:
 
 def clean_ai_output(text: str) -> str:
     """
-    Aggressively clean AI-generated contract text.
-    ALLaM-2-7B (7B params) tends to repeat signature blocks - we truncate after the FIRST one.
+    Clean AI-generated contract text for ALLaM-2-7B.
+    Handles repetition, truncates at proper endings, removes garbage.
     """
     if not text:
         return text
-    
-    # FIRST: Find the FIRST occurrence of signature/ending patterns and CUT there
-    first_end_markers = [
-        "والله ولي التوفيق",
-        "توقيع الطرف الأول:",
-        "توقيع المورد:",
-        "الممثل المعتمد لشركة",
-        "[اسم الممثل المعتمد",
-        "تم إبرام هذا العقد في مدينة",
-        "تم التوقيع على هذا العقد"
+
+    # Step 1: Remove common AI artifacts
+    artifacts = [
+        '**', '```', '---', '###', '___',
+        '[ملاحظة]', '[ملاحظات]', '[نهاية العقد]',
+        'ملاحظة:', 'ملاحظات:', 'المرفقات:',
+        'شهادة المنشأ:', 'شهادة التأمين:',
     ]
-    
-    best_cut_pos = len(text)
-    
-    for marker in first_end_markers:
+    for artifact in artifacts:
+        text = text.replace(artifact, '')
+
+    # Step 2: Find the FIRST proper ending and cut there
+    end_markers = [
+        ("والله ولي التوفيق", 300),  # marker, chars to include after
+        ("تحرر هذا العقد من نسختين", 150),
+        ("توقيع الطرف الأول", 200),
+        ("التوقيعات:", 200),
+        ("الطرف الأول:", 250),  # Signature section start
+    ]
+
+    best_cut = len(text)
+    for marker, extra in end_markers:
         pos = text.find(marker)
         if pos != -1:
-            # Find end of this section (next double newline or reasonable length after marker)
-            after_marker = pos + len(marker)
-            next_para = text.find('\n\n', after_marker)
-            
-            # For "والله ولي التوفيق", include a short signature section after
-            if marker == "والله ولي التوفيق":
-                # Allow up to 500 chars after for signatures, then cut
-                cut_point = min(after_marker + 500, next_para if next_para != -1 else after_marker + 500)
-            else:
-                # For other markers, include the line and one more paragraph
-                cut_point = next_para if next_para != -1 else after_marker + 200
-            
-            if cut_point < best_cut_pos:
-                best_cut_pos = cut_point
-    
-    # Cut at the best position found
-    if best_cut_pos < len(text):
-        text = text[:best_cut_pos].strip()
-    
-    # SECOND: Remove duplicate lines (ALLaM likes to repeat)
+            cut_point = min(pos + len(marker) + extra, len(text))
+            if cut_point < best_cut:
+                best_cut = cut_point
+
+    text = text[:best_cut].strip()
+
+    # Step 3: Remove duplicate consecutive lines (ALLaM repetition)
     lines = text.split('\n')
-    unique_lines = []
-    seen = set()
-    
+    cleaned_lines = []
+    prev_line = None
+
     for line in lines:
         stripped = line.strip()
+
+        # Allow empty lines
         if not stripped:
-            unique_lines.append(line)
+            if prev_line != '':
+                cleaned_lines.append('')
+            prev_line = ''
             continue
-        
-        # Skip exact duplicates
-        if stripped in seen:
+
+        # Skip if exact duplicate of previous non-empty line
+        if stripped == prev_line:
             continue
-        
-        seen.add(stripped)
-        unique_lines.append(line)
-    
-    text = '\n'.join(unique_lines).strip()
-    
-    # THIRD: Remove trailing garbage (lines ending with : or [ )
+
+        cleaned_lines.append(line)
+        prev_line = stripped
+
+    text = '\n'.join(cleaned_lines)
+
+    # Step 4: Remove duplicate paragraphs (longer repetitions)
+    paragraphs = text.split('\n\n')
+    seen_paras = set()
+    unique_paras = []
+
+    for para in paragraphs:
+        para_clean = para.strip()
+        if not para_clean:
+            continue
+        # Use first 50 chars as fingerprint
+        fingerprint = para_clean[:50]
+        if fingerprint in seen_paras:
+            continue
+        seen_paras.add(fingerprint)
+        unique_paras.append(para)
+
+    text = '\n\n'.join(unique_paras)
+
+    # Step 5: Remove trailing incomplete lines
     lines = text.split('\n')
-    while lines and (lines[-1].strip().endswith(':') or lines[-1].strip().endswith('[')):
-        lines.pop()
-    
+    while lines:
+        last = lines[-1].strip()
+        if last.endswith(':') or last.endswith('[') or last.endswith('(') or last == '':
+            lines.pop()
+        else:
+            break
+
     return '\n'.join(lines).strip()
 
 
 def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
     """Generate contract using Groq API with ALLaM-2-7B (SDAIA's Sovereign Arabic AI)."""
-    if not GROQ_API_KEY:
+    groq_api_key = _get_env('GROQ_API_KEY')
+    if not groq_api_key:
         raise ValueError("GROQ_API_KEY not set")
-    
+
     # ONLY USE ALLAM - SDAIA's Sovereign Arabic AI (Required for Hackathon)
-    # NO FALLBACK - If ALLaM fails, we want to know immediately
     candidate_models = ["allam-2-7b"]
-    
+
     logger.info("🇸🇦 Using ALLaM-2-7B (SDAIA Sovereign Arabic AI) for contract generation")
-    
+
     start_time = time.time()
-    
+
     for model in candidate_models:
         try:
             logger.info(f"Attempting Groq generation with model: {model}")
             response = requests.post(
                 'https://api.groq.com/openai/v1/chat/completions',
                 headers={
-                    'Authorization': f'Bearer {GROQ_API_KEY}',
+                    'Authorization': f'Bearer {groq_api_key}',
                     'Content-Type': 'application/json'
                 },
                 json={
@@ -165,21 +189,33 @@ def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
                         {'role': 'system', 'content': prompt_system},
                         {'role': 'user', 'content': prompt_user}
                     ],
-                    'temperature': 0.3,
-                    'max_tokens': 1500,  # Reduced to prevent ALLaM repetition
-                    'stop': ['###', '---END---', 'شهادة المنشأ:', 'شهادة التأمين:', 'بسم الله الرحمن الرحيم\nتم التوقيع']
+                    'temperature': 0.2,  # Lower for more deterministic output
+                    'max_tokens': 1000,  # Reduced to prevent repetition
+                    'top_p': 0.9,
+                    'stop': [
+                        '###',
+                        '---',
+                        'ملاحظة:',
+                        'ملاحظات:',
+                        'شهادة المنشأ',
+                        'شهادة التأمين',
+                        'المرفقات:',
+                        'نموذج',
+                        '**',
+                        'بسم الله الرحمن الرحيم\n\nبسم'  # Prevent restart
+                    ]
                 },
-                timeout=30  # Increased timeout for larger responses
+                timeout=45
             )
             response.raise_for_status()
-            
+
             duration = time.time() - start_time
             raw_result = response.json()['choices'][0]['message']['content']
             cleaned_result = clean_ai_output(raw_result)
-            
+
             logger.info(f"Groq generation successful with {model} in {duration:.2f}s (raw: {len(raw_result)}, cleaned: {len(cleaned_result)} chars)")
             return cleaned_result
-            
+
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 logger.warning(f"Model {model} not found on Groq, trying next...")
@@ -195,14 +231,15 @@ def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
 
 def generate_with_kimi(prompt_system: str, prompt_user: str) -> str:
     """Generate contract using Kimi (Moonshot) API."""
-    if not KIMI_API_KEY:
+    kimi_api_key = _get_env('KIMI_API_KEY')
+    if not kimi_api_key:
         raise ValueError("KIMI_API_KEY not set")
     
     start_time = time.time()
     response = requests.post(
         'https://api.moonshot.cn/v1/chat/completions',
         headers={
-            'Authorization': f'Bearer {KIMI_API_KEY}',
+            'Authorization': f'Bearer {kimi_api_key}',
             'Content-Type': 'application/json'
         },
         json={
@@ -225,6 +262,34 @@ def generate_with_kimi(prompt_system: str, prompt_user: str) -> str:
 
 def get_template_contract(supplier: str, buyer: str, items: str, price: str) -> str:
     """Return a template contract when AI is unavailable."""
+    context = _extract_contract_context(items)
+
+    scope = context.get('scope') or ''
+    start_date = context.get('start_date')
+    duration = context.get('duration')
+    payment_terms = context.get('payment_terms')
+    extra_clauses = context.get('extra_clauses')
+
+    duration_text = "يلتزم الطرف الأول بالتوريد خلال المدة المتفق عليها."
+    if start_date and duration:
+        duration_text = f"تبدأ مدة العقد من تاريخ {start_date} ولمدة {duration}، ويلتزم الطرف الأول بالتوريد خلال هذه المدة."
+    elif start_date:
+        duration_text = f"تبدأ مدة العقد من تاريخ {start_date}، ويلتزم الطرف الأول بالتوريد خلال المدة المتفق عليها."
+    elif duration:
+        duration_text = f"مدة العقد: {duration}، ويلتزم الطرف الأول بالتوريد خلال هذه المدة."
+
+    payment_text = "تُدفع عند استلام البضائع والتحقق من مطابقتها للمواصفات."
+    if payment_terms:
+        payment_text = f"تُدفع وفقاً لشروط الدفع المتفق عليها: {payment_terms}."
+
+    extra_section = ""
+    if extra_clauses:
+        extra_section = f"""
+
+البند السابع - بنود إضافية:
+يتفق الطرفان على تضمين البنود الإضافية التالية: {extra_clauses}.
+"""
+
     return f'''بسم الله الرحمن الرحيم
 
 عقد توريد
@@ -236,15 +301,15 @@ def get_template_contract(supplier: str, buyer: str, items: str, price: str) -> 
 
 البند الأول - موضوع العقد:
 يلتزم الطرف الأول بتوريد المواد التالية:
-{items}
+{scope}
 وفقاً للمواصفات والمعايير القياسية المعتمدة.
 
 البند الثاني - القيمة:
 القيمة الإجمالية للعقد: {price} ريال سعودي
-تُدفع عند استلام البضائع والتحقق من مطابقتها للمواصفات.
+{payment_text}
 
 البند الثالث - مدة التوريد:
-يلتزم الطرف الأول بالتوريد خلال المدة المتفق عليها.
+{duration_text}
 
 البند الرابع - الضمانات:
 يضمن الطرف الأول جودة المنتجات لمدة سنة من تاريخ التسليم.
@@ -253,10 +318,66 @@ def get_template_contract(supplier: str, buyer: str, items: str, price: str) -> 
 يخضع هذا العقد لأحكام نظام المعاملات المدنية السعودي الصادر بالمرسوم الملكي رقم م/191.
 
 البند السادس - فض النزاعات:
-في حال نشوء أي خلاف، يتم اللجوء أولاً للتسوية الودية، وإلا فالمحاكم السعودية المختصة.
+في حال نشوء أي خلاف، يتم اللجوء أولاً للتسوية الودية، وإلا فالمحاكم السعودية المختصة.{extra_section}
 
 تحرر هذا العقد من نسختين لكل طرف نسخة للعمل بموجبها.
 '''
+
+
+def _extract_contract_context(items: str) -> dict:
+    """
+    Extract structured context from the UI-packed `items` field.
+
+    Frontend sometimes appends:
+    - [ملاحظات AI]: ...
+    - --- التفاصيل التعاقدية ---
+      تاريخ البداية: ...
+      المدة: ...
+      شروط الدفع: ...
+      البنود الإضافية المطلوبة: ...
+    """
+    context = {
+        'scope': (items or '').strip(),
+        'ai_notes': None,
+        'start_date': None,
+        'duration': None,
+        'payment_terms': None,
+        'extra_clauses': None,
+    }
+
+    if not items or not isinstance(items, str):
+        return context
+
+    text = items.strip()
+
+    # Optional AI notes line (expected as first line)
+    first_line, *rest = text.splitlines()
+    if first_line.strip().startswith('[ملاحظات AI]:'):
+        context['ai_notes'] = first_line.split(':', 1)[1].strip() if ':' in first_line else None
+        text = '\n'.join(rest).lstrip()
+
+    marker = '--- التفاصيل التعاقدية ---'
+    if marker not in text:
+        context['scope'] = text.strip()
+        return context
+
+    before, after = text.split(marker, 1)
+    context['scope'] = before.strip()
+
+    for raw_line in after.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith('تاريخ البداية:'):
+            context['start_date'] = line.split(':', 1)[1].strip()
+        elif line.startswith('المدة:'):
+            context['duration'] = line.split(':', 1)[1].strip()
+        elif line.startswith('شروط الدفع:'):
+            context['payment_terms'] = line.split(':', 1)[1].strip()
+        elif line.startswith('البنود الإضافية المطلوبة:'):
+            context['extra_clauses'] = line.split(':', 1)[1].strip()
+
+    return context
 
 
 def generate_contract_ai(supplier: str, buyer: str, items: str, price: str, contract_type: str = 'supply') -> str:
@@ -273,97 +394,110 @@ def generate_contract_ai(supplier: str, buyer: str, items: str, price: str, cont
     - service (خدمات)
     - rental (إيجار)
     """
-    
-    # Base system prompt for Saudi legal context
-    system_base = '''أنت محامي سعودي خبير متخصص في صياغة العقود التجارية.
-مهمتك إنشاء عقد رسمي وقانوني يتوافق مع:
-- نظام المعاملات المدنية السعودي (المرسوم الملكي م/191)
-- أحكام الشريعة الإسلامية
+    context = _extract_contract_context(items)
 
-تعليمات مهمة:
-- ابدأ العقد بـ "بسم الله الرحمن الرحيم"
-- اكتب بلغة عربية فصحى رسمية.
-- اكتب العقد بشكل منظم في مواد مرقمة.
-- انتهِ العقد بجملة "والله ولي التوفيق" ثم التواقيع فقط.
-- لا تكتب أي شيء بعد قسم التواقيع.
-- لا تذكر "شهادات" أو حقول فارغة بعد العقد.
+    # Base system prompt for Saudi legal context - tuned for concise, Absher-style output
+    system_base = '''أنت محامي سعودي. اكتب عقداً عربياً رسمياً مختصراً ومنظماً بصياغة حكومية واضحة.
+
+تنسيق الإخراج:
+- لا تستخدم Markdown ولا عناوين ### ولا علامات ``` ولا فواصل زخرفية.
+- ابدأ بـ "بسم الله الرحمن الرحيم" ثم عنوان العقد في سطر مستقل.
+- بعد التمهيد، اكتب 6–8 مواد مرقمة بصيغة "المادة (1): ...".
+- كل مادة جملة أو جملتين فقط، بدون تكرار.
+- اذكر البيانات المتفق عليها (البضائع/النطاق، المدة، تاريخ البداية، الدفع) ضمن المواد بشكل طبيعي.
+- إذا طُلبت بنود إضافية (مثل الشرط الجزائي أو القوة القاهرة) فخصص لها مادة واضحة.
+- اختم بـ "والله ولي التوفيق" ثم "التوقيعات:" وخانتين للتوقيع للطرفين.
+
+قيود:
+- لا تذكر عبارات مثل "[ملاحظات AI]" أو "--- التفاصيل التعاقدية ---" ولا تنسخها حرفياً.
+- لا تكتب شهادات أو مرفقات أو ملاحظات ختامية خارج نطاق العقد.
+
+المرجع القانوني: نظام المعاملات المدنية السعودي (م/191)
 '''
 
-    # Specific instructions by type
+    # Specific instructions by type - CONCISE FOR ALLAM
     if contract_type == 'nda':
-        prompt_system = system_base + '''
-النوع: اتفاقية عدم إفصاح (NDA)
-ركز على:
-- تعريف المعلومات السرية بدقة.
-- التزامات الطرف المتلقي.
-- الاستثناءات من السرية.
-- مدة السرية (عادة 3-5 سنوات).
-- العقوبات والتعويض في حال الإخلال.'''
-        
-        prompt_user = f'''أنشئ اتفاقية عدم إفصاح بين:
-- الطرف المفصح: {supplier}
-- الطرف المتلقي: {buyer}
-- نطاق المعلومات السرية: {items}
-- مدة الاتفاقية: {price} سنوات (أو المدة المذكورة)
+        prompt_system = system_base + '\nالنوع: اتفاقية عدم إفصاح. المواد: تعريف السرية، الالتزامات، الاستثناءات، المدة، الجزاءات.'
 
-اكتب اتفاقية محكمة تحمي أسرار العمل.'''
+        prompt_user = f'''اتفاقية عدم إفصاح:
+الطرف المفصح: {supplier}
+الطرف المتلقي: {buyer}
+النطاق: {context["scope"]}'''
+
+        if context.get('duration'):
+            prompt_user += f'\nالمدة: {context["duration"]}'
+        else:
+            prompt_user += f'\nالمدة: {price} سنة'
+
+        if context.get('extra_clauses'):
+            prompt_user += f'\nبنود إضافية مطلوبة: {context["extra_clauses"]}'
+        if context.get('ai_notes'):
+            prompt_user += f'\nملاحظات: {context["ai_notes"]}'
 
     elif contract_type == 'service':
-        prompt_system = system_base + '''
-النوع: عقد تقديم خدمات
-ركز على:
-- نطاق الخدمات بوضوح.
-- الجدول الزمني للتنفيذ.
-- معايير الجودة والأداء.
-- آلية الدفع والاستلام.
-- الملكية الفكرية للمخرجات.'''
-        
-        prompt_user = f'''أنشئ عقد تقديم خدمات بين:
-- مقدم الخدمة: {supplier}
-- العميل: {buyer}
-- تفاصيل الخدمات: {items}
-- قيمة العقد: {price} ريال سعودي
+        prompt_system = system_base + '\nالنوع: عقد خدمات. المواد: نطاق العمل، المدة، القيمة، الدفع، الجودة، الإنهاء.'
 
-اكتب عقداً يضمن حقوق الطرفين ووضوح المخرجات.'''
+        prompt_user = f'''عقد خدمات:
+مقدم الخدمة: {supplier}
+العميل: {buyer}
+الخدمات/النطاق: {context["scope"]}
+القيمة: {price} ريال'''
+
+        if context.get('start_date'):
+            prompt_user += f'\nتاريخ البداية: {context["start_date"]}'
+        if context.get('duration'):
+            prompt_user += f'\nالمدة: {context["duration"]}'
+        if context.get('payment_terms'):
+            prompt_user += f'\nشروط الدفع: {context["payment_terms"]}'
+        if context.get('extra_clauses'):
+            prompt_user += f'\nبنود إضافية مطلوبة: {context["extra_clauses"]}'
+        if context.get('ai_notes'):
+            prompt_user += f'\nملاحظات: {context["ai_notes"]}'
 
     elif contract_type == 'rental':
-        prompt_system = system_base + '''
-النوع: عقد إيجار (معدات أو عقار تجاري)
-ركز على:
-- وصف العين المؤجرة.
-- مدة الإيجار وشروط التجديد.
-- قيمة الإيجار وطريقة السداد.
-- التزامات الصيانة والتشغيل.
-- حالة العين عند الإعادة.'''
-        
-        prompt_user = f'''أنشئ عقد إيجار بين:
-- المؤجر: {supplier}
-- المستأجر: {buyer}
-- وصف العين المؤجرة: {items}
-- قيمة الإيجار السنوي/الشهري: {price} ريال سعودي
+        prompt_system = system_base + '\nالنوع: عقد إيجار. المواد: وصف العين، المدة، القيمة، الصيانة، الإخلاء.'
 
-اكتب عقداً يحدد بوضوح التزامات الطرفين.'''
+        prompt_user = f'''عقد إيجار:
+المؤجر: {supplier}
+المستأجر: {buyer}
+وصف العين/النطاق: {context["scope"]}
+الأجرة: {price} ريال'''
 
-    else: # Default: Supply
-        prompt_system = system_base + '''
-النوع: عقد توريد بضائع
-ركز على:
-- مواصفات البضائع وجودتها.
-- موعد ومكان التسليم.
-- شروط الفحص والقبول.
-- الضمانات (عيوب التصنيع).'''
-        
-        prompt_user = f'''أنشئ عقد توريد رسمي بين:
-- المورد: {supplier}
-- المشتري: {buyer}
-- المواد المطلوبة: {items}
-- القيمة الإجمالية: {price} ريال سعودي
+        if context.get('start_date'):
+            prompt_user += f'\nتاريخ البداية: {context["start_date"]}'
+        if context.get('duration'):
+            prompt_user += f'\nالمدة: {context["duration"]}'
+        if context.get('payment_terms'):
+            prompt_user += f'\nشروط الدفع: {context["payment_terms"]}'
+        if context.get('extra_clauses'):
+            prompt_user += f'\nبنود إضافية مطلوبة: {context["extra_clauses"]}'
+        if context.get('ai_notes'):
+            prompt_user += f'\nملاحظات: {context["ai_notes"]}'
 
-اكتب عقداً شاملاً يحمي حقوق الطرفين.'''
+    else:  # Default: Supply
+        prompt_system = system_base + '\nالنوع: عقد توريد. المواد: البضائع، الكمية، السعر، التسليم، الضمان، الجزاءات.'
+
+        prompt_user = f'''عقد توريد:
+المورد: {supplier}
+المشتري: {buyer}
+البضائع/نطاق التوريد: {context["scope"]}
+القيمة: {price} ريال'''
+
+        if context.get('start_date'):
+            prompt_user += f'\nتاريخ البداية: {context["start_date"]}'
+        if context.get('duration'):
+            prompt_user += f'\nالمدة: {context["duration"]}'
+        if context.get('payment_terms'):
+            prompt_user += f'\nشروط الدفع: {context["payment_terms"]}'
+        if context.get('extra_clauses'):
+            prompt_user += f'\nبنود إضافية مطلوبة: {context["extra_clauses"]}'
+        if context.get('ai_notes'):
+            prompt_user += f'\nملاحظات: {context["ai_notes"]}'
 
     # Try providers in order
     providers = [
         ('Groq', lambda: generate_with_groq(prompt_system, prompt_user)),
+        ('ALLaM (HuggingFace)', lambda: generate_with_allam_hf(prompt_system, prompt_user)),
         ('Kimi', lambda: generate_with_kimi(prompt_system, prompt_user)),
     ]
     
