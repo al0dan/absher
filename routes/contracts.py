@@ -228,9 +228,22 @@ def create_contract_api():
         contract_type = data.get('contract_type', 'supply')
         supplier = sanitize_input(data.get('supplier', ''))
         buyer = sanitize_input(data.get('buyer', ''))
+        
+        # Get supplier_cr and supplier_vat from form OR from logged-in user session
         supplier_vat = sanitize_input(data.get('supplier_vat', ''))
-        buyer_vat = sanitize_input(data.get('buyer_vat', ''))
         supplier_cr = sanitize_input(data.get('supplier_cr', ''))
+        
+        # Fallback to session user's CR/VAT if not provided (ensures creator can sign)
+        if 'user' in session:
+            user_data = session['user']
+            if not supplier_cr and user_data.get('cr'):
+                supplier_cr = user_data.get('cr')
+            if not supplier_vat and user_data.get('vat'):
+                supplier_vat = user_data.get('vat')
+            if not supplier and user_data.get('name'):
+                supplier = user_data.get('name')
+        
+        buyer_vat = sanitize_input(data.get('buyer_vat', ''))
         buyer_cr = sanitize_input(data.get('buyer_cr', ''))
         items = sanitize_input(data.get('items', ''))
         price = data.get('price', 0)
