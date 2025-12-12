@@ -45,6 +45,25 @@ def dashboard():
 def service_page():
     return render_template('service.html')
 
+@main_bp.route('/api/contracts')
+@login_required
+def get_contracts_api():
+    user = session.get('user', {})
+    cr = user.get('cr')
+    
+    if not cr:
+        return jsonify([])
+        
+    contracts = Contract.query.filter((Contract.supplier_cr == cr) | (Contract.buyer_cr == cr)).all()
+    
+    return jsonify([{
+        'id': c.id,
+        'supplier': c.supplier,
+        'buyer': c.buyer,
+        'price': c.price,
+        'status': 'active' # Placeholder
+    } for c in contracts])
+
 @main_bp.route('/health')
 def health():
     return {"status": "healthy"}

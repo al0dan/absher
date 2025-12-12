@@ -8,9 +8,13 @@ from models import Contract, User
 from database import db
 from services.ai_service import generate_contract_ai
 from services.pdf_service import generate_contract_pdf 
+from services.wathq_service import WathqService
+from services.zatca_service import ZatcaService
 
 contracts_bp = Blueprint('contracts', __name__)
 logger = logging.getLogger(__name__)
+wathq_service = WathqService()
+zatca_service = ZatcaService()
 
 # --- Helpers ---
 
@@ -112,6 +116,39 @@ def view_contract(token_or_id):
         
     return render_template('contract-view.html', error=False, contract=c_dict, view_role=view_role, API_KEY=current_app.config.get('API_KEY'))
 
+@contracts_bp.route('/contract/<contract_id>/invoice')
+def download_invoice_xml_route(contract_id):
+    try:
+        contract = Contract.query.get(contract_id)
+        if not contract:
+            return jsonify({'error': 'Contract not found'}), 404
+            
+        c_dict = contract.to_dict() # Use to_dict helper or dict
+        # We need more fields than to_dict provides for invoice (vat etc)
+        # So let's construct it manually or update to_dict
+        c_dict = {
+            'id': contract.id,
+            'supplier': contract.supplier,
+            'buyer': contract.buyer,
+            'supplier_vat': contract.supplier_vat,
+            'buyer_vat': contract.buyer_vat,
+            'price': contract.price,
+            'items': contract.items
+        }
+        
+        xml_bytes = zatca_service.generate_invoice_xml(c_dict)
+        
+        return Response(
+            xml_bytes,
+            mimetype='application/xml',
+            headers={
+                'Content-Disposition': f'attachment; filename=invoice_{contract_id}.xml'
+            }
+        )
+    except Exception as e:
+        logger.error(f"Invoice generation failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @contracts_bp.route('/contract/<contract_id>/pdf')
 def download_contract_pdf_route(contract_id):
     try:
@@ -170,13 +207,14 @@ def lookup_cr_api():
     if not cr:
         return jsonify({'found': False, 'error': 'CR required'}), 400
         
-    user = User.query.filter_by(cr_number=cr).first()
+    # Phase 2: Use Wathq Service
+    result = wathq_service.get_cr_data(cr)
     
-    if user:
+    if result:
         return jsonify({
             'found': True,
-            'company_name': user.company_name,
-            'vat_number': user.vat_number
+            'company_name': result['company_name'],
+            'vat_number': '' # Wathq usually provides CR data, VAT is ZATCA. We can return empty or try to map if provided.
         })
     return jsonify({'found': False})
 
@@ -187,6 +225,7 @@ def lookup_cr_api():
 def create_contract_api():
     try:
         data = request.json
+        contract_type = data.get('contract_type', 'supply')
         supplier = sanitize_input(data.get('supplier', ''))
         buyer = sanitize_input(data.get('buyer', ''))
         supplier_vat = sanitize_input(data.get('supplier_vat', ''))
@@ -197,29 +236,37 @@ def create_contract_api():
         price = data.get('price', 0)
 
         errors = []
-        if len(supplier) < 3: errors.append("Provider name too short")
-        if len(buyer) < 3: errors.append("Buyer name too short")
-        if len(items) < 10: errors.append("Items description too short")
+        if len(supplier) < 3: errors.append("First party name too short")
+        if len(buyer) < 3: errors.append("Second party name too short")
+        if len(items) < 10: errors.append("Description/Scope too short")
         
-        vat_res = validate_vat_number(supplier_vat)
-        if supplier_vat and not vat_res['valid']: errors.append(f"Supplier VAT: {vat_res['error']}")
+        # VAT validation only if provided (strict for supply/service, maybe loose for NDA?)
+        # Keeping it consistent for now.
+        if supplier_vat:
+             vat_res = validate_vat_number(supplier_vat)
+             if not vat_res['valid']: errors.append(f"First party VAT: {vat_res['error']}")
         
-        buyer_vat_res = validate_vat_number(buyer_vat)
-        if buyer_vat and not buyer_vat_res['valid']: errors.append(f"Buyer VAT: {buyer_vat_res['error']}")
+        if buyer_vat:
+            buyer_vat_res = validate_vat_number(buyer_vat)
+            if not buyer_vat_res['valid']: errors.append(f"Second party VAT: {buyer_vat_res['error']}")
 
         try:
             price = float(price)
-            if price < 0.01: errors.append("Price invalid")
+            # For NDA, price might be 0 or duration, but usually contracts have value. 
+            # If type is NDA, we might accept 0 or treat 'price' as num years.
+            if contract_type != 'nda' and price < 0.01: 
+                errors.append("Price invalid")
         except:
-            errors.append("Price invalid format")
+            errors.append("Price/Duration invalid format")
 
         if errors:
             return jsonify({'error': 'validation_error', 'messages': errors}), 400
         
-        contract_text = generate_contract_ai(supplier, buyer, items, price)
+        contract_text = generate_contract_ai(supplier, buyer, items, price, contract_type)
         
         new_contract = Contract(
             id=str(uuid.uuid4())[:8],
+            contract_type=contract_type,
             supplier=supplier,
             buyer=buyer,
             supplier_vat=supplier_vat,

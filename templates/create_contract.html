@@ -32,6 +32,36 @@
         .hidden {
             display: none;
         }
+
+        .type-card {
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px 25px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            background: #fff;
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .type-card:hover {
+            border-color: var(--business-theme-color);
+            background: #f9f9f9;
+        }
+
+        .type-card.selected {
+            border-color: var(--business-theme-color);
+            background: #e8f5e9;
+            color: var(--business-theme-color);
+            font-weight: bold;
+        }
+
+        .type-card .icon {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 
@@ -69,11 +99,36 @@
         </div>
 
         <div class="form-card" role="form" aria-labelledby="formTitle">
-            <h1 class="form-title" id="formTitle">بيانات العقد الجديد</h1>
+            <h1 class="form-title" id="formTitle">عقد توريد جديد</h1>
+
+            <!-- Contract Type Selector -->
+            <div class="contract-type-selector"
+                style="display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; flex-wrap: wrap;">
+                <label class="type-card selected" onclick="selectType(this, 'supply')">
+                    <input type="radio" name="contract_type" value="supply" checked hidden>
+                    <span class="icon">📦</span>
+                    <span>توريد</span>
+                </label>
+                <label class="type-card" onclick="selectType(this, 'service')">
+                    <input type="radio" name="contract_type" value="service" hidden>
+                    <span class="icon">🛠️</span>
+                    <span>خدمات</span>
+                </label>
+                <label class="type-card" onclick="selectType(this, 'nda')">
+                    <input type="radio" name="contract_type" value="nda" hidden>
+                    <span class="icon">🔒</span>
+                    <span>عدم إفصاح</span>
+                </label>
+                <label class="type-card" onclick="selectType(this, 'rental')">
+                    <input type="radio" name="contract_type" value="rental" hidden>
+                    <span class="icon">🏠</span>
+                    <span>إيجار</span>
+                </label>
+            </div>
 
             <form id="contractForm" aria-label="نموذج إنشاء عقد جديد">
                 <!-- Supplier Section (Auto-filled from login) -->
-                <h3
+                <h3 id="lbl-supplier"
                     style="color: var(--business-theme-color); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
                     بيانات الطرف الأول (المورد)
                     <span style="font-size: 12px; color: #666; font-weight: normal;">- يتم تعبئتها تلقائياً من
@@ -103,7 +158,7 @@
                 </div>
 
                 <!-- Buyer Section -->
-                <h3
+                <h3 id="lbl-buyer"
                     style="color: var(--business-theme-color); border-bottom: 1px solid #eee; padding-bottom: 10px; margin: 30px 0 20px;">
                     بيانات الطرف الثاني (المشتري)</h3>
 
@@ -197,6 +252,53 @@
 
     <script>
         const API_KEY = '{{ API_KEY }}';
+
+        // Contract Type Definitions
+        const FIELD_LABELS = {
+            supply: {
+                title: 'عقد توريد جديد',
+                supplier: 'بيانات الطرف الأول (المورد)',
+                buyer: 'بيانات الطرف الثاني (المشتري)',
+                items: 'تفاصيل البضائع / الخدمات',
+                price: 'قيمة العقد (ريال سعودي)'
+            },
+            service: {
+                title: 'عقد خدمات جديد',
+                supplier: 'بيانات الطرف الأول (مقدم الخدمة)',
+                buyer: 'بيانات الطرف الثاني (العميل)',
+                items: 'نطاق الخدمات المطلوبة',
+                price: 'قيمة العقد (ريال سعودي)'
+            },
+            nda: {
+                title: 'اتفاقية عدم إفصاح (NDA)',
+                supplier: 'بيانات الطرف الأول (المفصح)',
+                buyer: 'بيانات الطرف الثاني (المتلقي)',
+                items: 'نطاق المعلومات السرية',
+                price: 'مدة الاتفاقية (بالسنوات)'
+            },
+            rental: {
+                title: 'عقد إيجار جديد',
+                supplier: 'بيانات الطرف الأول (المؤجر)',
+                buyer: 'بيانات الطرف الثاني (المستأجر)',
+                items: 'وصف العين المؤجرة',
+                price: 'قيمة الإيجار (ريال سعودي)'
+            }
+        };
+
+        function selectType(card, type) {
+            // UI Update
+            document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            card.querySelector('input').checked = true;
+
+            // Labels Update
+            const labels = FIELD_LABELS[type];
+            document.getElementById('formTitle').textContent = labels.title;
+            document.getElementById('lbl-supplier').textContent = labels.supplier; // Need to add ID to HTML
+            document.getElementById('lbl-buyer').textContent = labels.buyer; // Need to add ID to HTML
+            document.querySelector('label[for="items"]').textContent = labels.items;
+            document.querySelector('label[for="price"]').textContent = labels.price;
+        }
 
         // Real-time Validation
         document.querySelectorAll('.form-control').forEach(input => {

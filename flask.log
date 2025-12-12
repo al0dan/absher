@@ -1,0 +1,22 @@
+nohup: ignoring input
+2025-12-12 14:46:07,236 - WARNING - Nafath credentials missing. Running in SIMULATION MODE.
+2025-12-12 14:46:07,256 - INFO - Seeding database with mock data...
+2025-12-12 14:46:08,312 - INFO - Database seeded.
+ * Serving Flask app 'app'
+ * Debug mode: on
+2025-12-12 14:46:08,321 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.10.7:5000
+2025-12-12 14:46:08,321 - INFO - [33mPress CTRL+C to quit[0m
+2025-12-12 14:46:08,322 - INFO -  * Restarting with stat
+2025-12-12 14:46:09,013 - WARNING - Nafath credentials missing. Running in SIMULATION MODE.
+2025-12-12 14:46:09,028 - WARNING -  * Debugger is active!
+2025-12-12 14:46:09,031 - INFO -  * Debugger PIN: 137-586-507
+2025-12-12 14:46:21,591 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:21] "GET /dashboard HTTP/1.1" 200 -
+2025-12-12 14:46:21,640 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:21] "[36mGET /css/styles.css HTTP/1.1[0m" 304 -
+2025-12-12 14:46:21,687 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:21] "[36mGET /img/vission-logo.png HTTP/1.1[0m" 304 -
+2025-12-12 14:46:21,688 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:21] "[36mGET /img/Absher_Business_logo.svg HTTP/1.1[0m" 304 -
+2025-12-12 14:46:21,690 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:21] "[36mGET /img/Grid_colored.svg HTTP/1.1[0m" 304 -
+2025-12-12 14:46:21,691 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:21] "[36mGET /img/moi-logo.svg HTTP/1.1[0m" 304 -
+2025-12-12 14:46:28,907 - INFO - 127.0.0.1 - - [12/Dec/2025 14:46:28] "GET /health HTTP/1.1" 200 -

@@ -12,6 +12,7 @@ from routes.auth import auth_bp
 from routes.main import main_bp
 from routes.contracts import contracts_bp
 from services.email_service import mail
+from services.nafath_service import init_nafath
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -45,6 +46,7 @@ def create_app():
     # Extensions
     db.init_app(app)
     mail.init_app(app)
+    init_nafath(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
     limiter = Limiter(

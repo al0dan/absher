@@ -27,6 +27,7 @@ class Contract(db.Model):
     __tablename__ = 'contracts'
 
     id = db.Column(db.String(36), primary_key=True) # UUID
+    contract_type = db.Column(db.String(50), default='supply', nullable=False) # supply, nda, service, rental
     supplier = db.Column(db.String(200), nullable=False)
     buyer = db.Column(db.String(200), nullable=False)
     supplier_vat = db.Column(db.String(20))

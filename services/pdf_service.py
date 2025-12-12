@@ -1,11 +1,16 @@
 """
-PDF Service using Playwright (Headless Chrome)
+PDF Service using WeasyPrint
 Generates Arabic PDFs with proper BiDi support and text selectability.
 """
 import os
 import base64
 import logging
-from playwright.sync_api import sync_playwright
+
+try:
+    from weasyprint import HTML, CSS
+    WEASYPRINT_AVAILABLE = True
+except ImportError:
+    WEASYPRINT_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +18,6 @@ def get_image_base64(path):
     """Read image file and convert to base64 data URI"""
     try:
         # Resolve path relative to project root
-        # Service is in /services, img is in /img
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         full_path = os.path.join(base_dir, path.lstrip('/'))
         
@@ -33,37 +37,23 @@ def get_image_base64(path):
 
 def generate_pdf_from_html(html_content: str, output_path: str = None) -> bytes:
     """
-    Generate a PDF from HTML content using headless Chrome.
+    Generate a PDF from HTML content using WeasyPrint.
     """
+    if not WEASYPRINT_AVAILABLE:
+        logger.error("WeasyPrint not available")
+        raise ImportError("WeasyPrint is required for PDF generation")
+    
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            
-            # Set Arabic content with proper RTL
-            page.set_content(html_content, wait_until='networkidle')
-            
-            # Generate PDF with A4 settings
-            pdf_bytes = page.pdf(
-                format='A4',
-                print_background=True,
-                margin={
-                    'top': '15mm',
-                    'bottom': '15mm',
-                    'left': '10mm',
-                    'right': '10mm'
-                }
-            )
-            
-            browser.close()
-            
-            if output_path:
-                with open(output_path, 'wb') as f:
-                    f.write(pdf_bytes)
-                logger.info(f"PDF saved to {output_path}")
-            
-            return pdf_bytes
-            
+        html = HTML(string=html_content)
+        pdf_bytes = html.write_pdf()
+        
+        if output_path:
+            with open(output_path, 'wb') as f:
+                f.write(pdf_bytes)
+            logger.info(f"PDF saved to {output_path}")
+        
+        return pdf_bytes
+        
     except Exception as e:
         logger.error(f"PDF generation failed: {e}")
         raise
@@ -91,18 +81,17 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
         }}
 
         * {{
-            font-family: 'Noto Sans Arabic', 'DINNextArabic', sans-serif;
+            font-family: 'Noto Sans Arabic', sans-serif;
             box-sizing: border-box;
         }}
         
         body {{
             margin: 0;
-            padding: 0; /* Let PDF margins handle the whitespace */
+            padding: 20px;
             direction: rtl;
             color: #333;
         }}
         
-        /* Compact Header */
         .pdf-header {{
             display: flex;
             justify-content: space-between;
@@ -118,7 +107,6 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             gap: 12px;
         }}
         
-        /* Compact Title */
         .contract-title {{
             text-align: center;
             margin-bottom: 20px;
@@ -127,7 +115,7 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
         .contract-title h1 {{
             color: var(--business-theme-color);
             margin: 0;
-            font-size: 20px; /* Slightly smaller for compactness */
+            font-size: 20px;
         }}
         
         .contract-id {{
@@ -141,7 +129,6 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             font-weight: bold;
         }}
         
-        /* Parties - Compact Grid */
         .parties-grid {{
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -154,7 +141,7 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             border: 1px solid #e9ecef;
             border-right: 3px solid var(--business-theme-color);
             border-radius: 6px;
-            padding: 10px 15px; /* Tighter padding */
+            padding: 10px 15px;
         }}
         
         .party-title {{
@@ -179,7 +166,6 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             margin-bottom: 4px;
         }}
         
-        /* Contract Text - Adaptive Height */
         .contract-body {{
             background: linear-gradient(to bottom, #fefefe, #f9f9f9);
             padding: 20px;
@@ -187,19 +173,16 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             border: 1px solid #e0e0e0;
             border-right: 3px solid var(--business-theme-color);
             font-size: 12px;
-            line-height: 1.6; /* Tighter line height */
+            line-height: 1.6;
             white-space: pre-wrap;
             text-align: justify;
             margin-bottom: 30px;
-            /* Removed min-height to fix spacing issues */
         }}
         
-        /* Signatures - Compact */
         .signatures-section {{
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
-            page-break-inside: avoid;
         }}
         
         .signature-block {{
@@ -218,7 +201,6 @@ def generate_contract_pdf(contract_data: dict) -> bytes:
             object-fit: contain;
         }}
         
-        /* Footer */
         .pdf-footer {{
             margin-top: 30px;
             text-align: center;

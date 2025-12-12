@@ -146,7 +146,7 @@
                     <td>#{{ contract.id }}</td>
                     <td>{{ contract.buyer }}</td>
                     <td>{{ contract.price }} ر.س</td>
-                    <td>{{ contract.created_at[:10] }}</td>
+                    <td>{{ contract.created_at.strftime('%Y-%m-%d') if contract.created_at else 'N/A' }}</td>
                     <td>
                         {% if contract.signed_by_supplier and contract.signed_by_buyer %}
                         <span class="status-badge status-signed">مكتمل</span>
