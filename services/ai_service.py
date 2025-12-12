@@ -66,13 +66,69 @@ def generate_with_allam_hf(prompt_system: str, prompt_user: str) -> str:
     raise ValueError(f"Unexpected response format: {result}")
 
 
+def clean_ai_output(text: str) -> str:
+    """Clean AI-generated contract text by removing trailing garbage."""
+    if not text:
+        return text
+    
+    # Common patterns indicating end of actual contract
+    end_markers = [
+        "توقيع الطرف الأول",
+        "توقيع الطرف الثاني",
+        "توقيع المشتري",
+        "توقيع المورد",
+        "والله ولي التوفيق",
+        "تم تحرير هذا العقد",
+        "انتهى العقد"
+    ]
+    
+    # Find the last occurrence of any end marker
+    last_valid_pos = len(text)
+    for marker in end_markers:
+        pos = text.rfind(marker)
+        if pos != -1:
+            # Include some reasonable ending after the marker
+            end_pos = text.find('\n\n', pos + len(marker))
+            if end_pos != -1 and end_pos < last_valid_pos:
+                last_valid_pos = end_pos
+    
+    # Also detect repetitive patterns (like "شهادة المنشأ:" repeated)
+    lines = text.split('\n')
+    unique_lines = []
+    seen_patterns = set()
+    
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            unique_lines.append(line)
+            continue
+        
+        # Skip if we've seen this exact line multiple times
+        if stripped in seen_patterns:
+            # Check if this is a repeated certificate line
+            if 'شهادة' in stripped or ':' in stripped and len(stripped) < 30:
+                continue  # Skip repetitive certificate placeholders
+        
+        seen_patterns.add(stripped)
+        unique_lines.append(line)
+    
+    cleaned = '\n'.join(unique_lines).strip()
+    
+    # Remove trailing garbage (lines that are just labels with no content)
+    lines = cleaned.split('\n')
+    while lines and lines[-1].strip().endswith(':'):
+        lines.pop()
+    
+    return '\n'.join(lines).strip()
+
+
 def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
-    """Generate contract using Groq API (Prioritizing ALLaM Dummah)."""
+    """Generate contract using Groq API (Prioritizing ALLaM, fallback to Llama)."""
     if not GROQ_API_KEY:
         raise ValueError("GROQ_API_KEY not set")
     
-    # Priority list for Groq: Allam 2 (SDAIA) -> Llama 3.3 (Fallback)
-    candidate_models = ["allam-2-7b", "llama-3.3-70b-versatile"]
+    # Priority: ALLaM-2-7B (SDAIA) -> Llama 3.3 (High Quality Fallback)
+    candidate_models = ["allam-2-7b", "llama-3.3-70b-versatile", "llama-3.1-70b-versatile"]
     
     start_time = time.time()
     
@@ -91,19 +147,23 @@ def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
                         {'role': 'system', 'content': prompt_system},
                         {'role': 'user', 'content': prompt_user}
                     ],
-                    'temperature': 0.2,
-                    'max_tokens': 2000
+                    'temperature': 0.3,  # Slightly higher for more natural text
+                    'max_tokens': 2500,  # Allow enough for full contracts
+                    'stop': ['###', '---END---', 'شهادة المنشأ:', 'شهادة التأمين:']  # Stop on garbage patterns
                 },
-                timeout=15
+                timeout=30  # Increased timeout for larger responses
             )
             response.raise_for_status()
             
             duration = time.time() - start_time
-            logger.info(f"Groq generation successful with {model} in {duration:.2f}s")
-            return response.json()['choices'][0]['message']['content']
+            raw_result = response.json()['choices'][0]['message']['content']
+            cleaned_result = clean_ai_output(raw_result)
+            
+            logger.info(f"Groq generation successful with {model} in {duration:.2f}s (raw: {len(raw_result)}, cleaned: {len(cleaned_result)} chars)")
+            return cleaned_result
             
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404: # Model not found
+            if e.response.status_code == 404:
                 logger.warning(f"Model {model} not found on Groq, trying next...")
                 continue
             logger.warning(f"Groq error with {model}: {e}")
@@ -202,8 +262,13 @@ def generate_contract_ai(supplier: str, buyer: str, items: str, price: str, cont
 - نظام المعاملات المدنية السعودي (المرسوم الملكي م/191)
 - أحكام الشريعة الإسلامية
 
-ابدأ العقد بـ "بسم الله الرحمن الرحيم"
-اكتب بلغة عربية فصحى رسمية.
+تعليمات مهمة:
+- ابدأ العقد بـ "بسم الله الرحمن الرحيم"
+- اكتب بلغة عربية فصحى رسمية.
+- اكتب العقد بشكل منظم في مواد مرقمة.
+- انتهِ العقد بجملة "والله ولي التوفيق" ثم التواقيع فقط.
+- لا تكتب أي شيء بعد قسم التواقيع.
+- لا تذكر "شهادات" أو حقول فارغة بعد العقد.
 '''
 
     # Specific instructions by type
