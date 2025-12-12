@@ -4,148 +4,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة المعلومات - أبشر أعمال</title>
+    <title>مركز القيادة - أبشر أعمال</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Dashboard Specific Styles */
-        .dashboard-stats {
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
             margin-bottom: 30px;
         }
 
-        .stat-card {
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .dash-card {
             background: #fff;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: all 0.3s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            margin-bottom: 25px;
         }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-color: var(--business-theme-color);
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            background: #f0f7ff;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--business-theme-color);
-            font-size: 24px;
-        }
-
-        .stat-info h3 {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-            font-weight: normal;
-        }
-
-        .stat-info .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 5px;
-        }
-
-        .welcome-section {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
+        .dash-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-image: url('/img/Grid_colored.svg');
-            /* Reuse header pattern if available or just white */
-            background-size: cover;
-        }
-
-        .contracts-section h2 {
-            border-bottom: 2px solid var(--business-theme-color);
-            display: inline-block;
-            padding-bottom: 10px;
             margin-bottom: 20px;
-            color: var(--business-theme-color);
-            font-size: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
         }
 
+        .dash-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--business-theme-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Action Center */
+        .action-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff8e1;
+            border-right: 4px solid #ffbd2e;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+
+        .action-item:hover {
+            transform: translateX(-5px);
+        }
+
+        /* Quick Actions Grid */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .action-btn {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+
+        .action-btn:hover {
+            border-color: var(--business-theme-color);
+            background: #f9fcff;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Analytics */
+        .analytics-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+
+        /* Table */
         .absher-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #eee;
         }
 
         .absher-table th {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 12px;
             text-align: right;
             color: #555;
-            font-weight: 700;
-            border-bottom: 1px solid #eee;
         }
 
         .absher-table td {
-            padding: 15px;
+            padding: 12px;
             border-bottom: 1px solid #eee;
-            color: #333;
-        }
-
-        .absher-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .absher-table tr:hover td {
-            background-color: #fcfcfc;
         }
 
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
         }
 
-        .status-completed {
+        .bg-green {
             background: #e8f5e9;
             color: #2e7d32;
         }
 
-        .status-pending {
+        .bg-orange {
             background: #fff3e0;
             color: #ef6c00;
-        }
-
-        @media (max-width: 768px) {
-            .welcome-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
         }
     </style>
 </head>
 
 <body>
-
-    <!-- Header matching create_contract.html -->
+    <!-- Standard Header -->
     <header class="top-header">
         <div class="top-header-inner">
             <div class="header-left">
@@ -159,173 +171,243 @@
                         <img src="/img/globe.svg" class="globe">
                     </a>
                 </div>
-                <!-- Logout Link -->
+                <!-- Logout -->
                 <a href="/logout"
                     style="color: #666; text-decoration: none; margin-left: 15px; font-weight: 500; display: flex; align-items: center; gap: 5px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" style="width: 20px; height: 20px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    تسجيل الخروج
+                    <span>تسجيل الخروج</span>
                 </a>
-
-                <img src="/img/vission-logo.png" alt="Vision 2030" class="logo-2030">
-                <img src="/img/moi-logo.svg" alt="MOI" class="logo-moi">
+                <img src="/img/vission-logo.png" style="height:55px; margin-left:10px;">
+                <img src="/img/moi-logo.svg" style="height:55px">
             </div>
         </div>
     </header>
 
-    <main class="absher-form-section" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <main class="absher-form-section" style="max-width: 1200px; margin: 30px auto; padding: 0 20px;">
 
-        <!-- Breadcrumb -->
-        <div style="margin-bottom: 25px; font-weight: 600; color: #666;">
-            <a href="/" style="color: #666; text-decoration: none;">الرئيسية</a>
-            <span style="margin: 0 5px;">></span>
-            <span style="color: var(--business-theme-color);">لوحة المعلومات</span>
-        </div>
-
-        <!-- Welcome Section -->
-        <div class="welcome-section">
+        <!-- Welcome & Breadcrumb -->
+        <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 30px;">
             <div>
-                <h1 style="margin: 0 0 5px 0; color: var(--business-theme-color); font-size: 24px;">مرحباً، {{ user.name
-                    }}</h1>
-                <p style="margin: 0; color: #777;">الرقم الموحد: <span style="font-family: monospace;">{{ user.id
-                        }}</span></p>
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">الرئيسية > مركز القيادة</div>
+                <h1 style="margin: 0; font-size: 26px; color: var(--business-theme-color);">أهلاً بك، {{ user.name }}
+                </h1>
+                <p style="margin: 5px 0 0 0; color: #777;">الرقم الموحد: <span
+                        style="font-family: monospace; font-weight: bold;">{{ user.id }}</span></p>
             </div>
-            <a href="/create" class="btn-absher">
-                <span style="margin-left: 8px;">+</span> إنشاء عقد جديد
-            </a>
+            <div style="text-align: left;">
+                <div style="font-size: 12px; color: #666;">حالة الامتثال</div>
+                <div style="color: #2e7d32; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                    </svg>
+                    نشط و موثّق (Wathq)
+                </div>
+            </div>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="dashboard-stats">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" style="width: 28px; height: 28px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
+        <div class="dashboard-grid">
+
+            <!-- RIGHT COLUMN (Main) -->
+            <div>
+                <!-- Action Center -->
+                {% if actions_required %}
+                <div class="dash-card" style="border: 1px solid #ffecb3;">
+                    <div class="dash-header" style="border-bottom-color: #ffecb3;">
+                        <div class="dash-title" style="color: #ff6f00;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            إجراءات مطلوبة ({{ actions_required|length }})
+                        </div>
+                    </div>
+                    {% for action in actions_required %}
+                    <div class="action-item">
+                        <div>
+                            <div style="font-weight: bold;">طلب توقيع عقد #{{ action.id }}</div>
+                            <div style="font-size: 12px; color: #666;">الطرف الآخر: {{ action.buyer if
+                                action.supplier_cr == user.cr else action.supplier }}</div>
+                        </div>
+                        <a href="/contract/{{ action.id }}" class="btn-absher"
+                            style="padding: 5px 15px; font-size: 12px;">توقيع الآن</a>
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="stat-info">
-                    <h3>إجمالي العقود</h3>
-                    <div class="number">{{ contracts|length }}</div>
+                {% endif %}
+
+                <!-- Financial Overview -->
+                <div class="dash-card">
+                    <div class="analytics-row">
+                        <div style="flex: 1; border-left: 1px solid #eee; padding-left: 20px;">
+                            <div style="font-size: 13px; color: #666;">إجمالي قيمة العقود</div>
+                            <div style="font-size: 32px; font-weight: bold; color: var(--business-theme-color);">{{
+                                "{:,.2f}".format(total_value) }} <span style="font-size: 14px;">ر.س</span></div>
+                            <div style="font-size: 11px; color: #2e7d32;">+12% عن الشهر السابق</div>
+                        </div>
+                        <div style="flex: 1; border-left: 1px solid #eee; padding-left: 20px;">
+                            <div style="font-size: 13px; color: #666;">العقود النشطة</div>
+                            <div style="font-size: 32px; font-weight: bold;">{{ status_stats.signed }}</div>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; color: #666;">متوسط الإنجاز</div>
+                            <div style="font-size: 32px; font-weight: bold;">98%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Contracts -->
+                <div class="dash-card">
+                    <div class="dash-header">
+                        <div class="dash-title">أحدث العقود</div>
+                        <a href="#" style="font-size: 12px; color: var(--business-theme-color);">عرض الكل</a>
+                    </div>
+                    <table class="absher-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الطرف الثاني</th>
+                                <th>القيمة</th>
+                                <th>النوع</th>
+                                <th>الحالة</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contracts[:5] %}
+                            <tr>
+                                <td style="font-weight: bold;">{{ c.id }}</td>
+                                <td>{{ c.buyer }}</td>
+                                <td>{{ c.price }}</td>
+                                <td>
+                                    {% if c.contract_type == 'supply' %}📦 توريد
+                                    {% elif c.contract_type == 'service' %}🛠️ خدمات
+                                    {% elif c.contract_type == 'nda' %}🔒 NDA
+                                    {% else %}📄 {{ c.contract_type }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if c.signed_by_supplier and c.signed_by_buyer %}
+                                    <span class="status-badge bg-green">مكتمل</span>
+                                    {% else %}
+                                    <span class="status-badge bg-orange">انتظار</span>
+                                    {% endif %}
+                                </td>
+                                <td><a href="/contract/{{ c.id }}"
+                                        style="color: var(--business-theme-color); font-size: 12px; font-weight: bold;">عرض</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not contracts %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 30px; color: #999;">لا توجد بيانات
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #e0f2f1; color: #00897b;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" style="width: 28px; height: 28px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            <!-- LEFT COLUMN (Sidebar/Tools) -->
+            <div>
+                <!-- Create New -->
+                <div class="dash-card"
+                    style="background: linear-gradient(135deg, var(--business-theme-color) 0%, #155e96 100%); color: white; border: none;">
+                    <h3 style="margin-top: 0;">إنشاء عقد جديد</h3>
+                    <p style="font-size: 13px; opacity: 0.9;">ابدأ بتوثيق تعاملاتك التجارية الآن بشكل معتمد.</p>
+                    <a href="/create" class="btn-absher"
+                        style="background: white; color: var(--business-theme-color); width: 100%; display: block; text-align: center;">+
+                        إنشاء عقد</a>
                 </div>
-                <div class="stat-info">
-                    <h3>العقود الموقعة</h3>
-                    <div class="number">{{
-                        contracts|selectattr('signed_by_supplier')|selectattr('signed_by_buyer')|list|length }}</div>
-                </div>
-            </div>
 
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #fff3e0; color: #ef6c00;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" style="width: 28px; height: 28px;">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                <!-- Visuals -->
+                <div class="dash-card">
+                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px;">توزيع العقود</div>
+                    <div class="chart-container" style="height: 180px;">
+                        <canvas id="typeChart"></canvas>
+                    </div>
                 </div>
-                <div class="stat-info">
-                    <h3>بانتظار التوقيع</h3>
-                    <div class="number">
-                        {% set completed =
-                        contracts|selectattr('signed_by_supplier')|selectattr('signed_by_buyer')|list|length %}
-                        {{ (contracts|length) - completed }}
+
+                <div class="dash-card">
+                    <div class="dash-title" style="font-size: 14px; margin-bottom: 15px;">حالة التوقيع</div>
+                    <div class="chart-container" style="height: 180px;">
+                        <canvas id="statusChart"></canvas>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- Contracts Table -->
-        <div class="contracts-section">
-            <h2>أحدث العقود</h2>
-
-            {% if contracts %}
-            <div style="overflow-x: auto;">
-                <table class="absher-table">
-                    <thead>
-                        <tr>
-                            <th>رقم العقد</th>
-                            <th>الطرف الثاني</th>
-                            <th>القيمة</th>
-                            <th>نوع العقد</th>
-                            <th>التاريخ</th>
-                            <th>الحالة</th>
-                            <th>إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for contract in contracts %}
-                        <tr>
-                            <td style="font-weight: bold; color: var(--business-theme-color);">#{{ contract.id }}</td>
-                            <td>{{ contract.buyer }}</td>
-                            <td>{{ contract.price }} ر.س</td>
-                            <td>
-                                <!-- Map type to readable text -->
-                                {% if contract.contract_type == 'supply' %}توريد
-                                {% elif contract.contract_type == 'service' %}خدمات
-                                {% elif contract.contract_type == 'nda' %}عدم إفصاح
-                                {% elif contract.contract_type == 'rental' %}إيجار
-                                {% else %}{{ contract.contract_type or 'عام' }}
-                                {% endif %}
-                            </td>
-                            <td style="direction: ltr; text-align: right;">{{ contract.created_at.strftime('%Y-%m-%d')
-                                if contract.created_at else '' }}</td>
-                            <td>
-                                {% if contract.signed_by_supplier and contract.signed_by_buyer %}
-                                <span class="status-badge status-completed">مكتمل</span>
-                                {% else %}
-                                <span class="status-badge status-pending">قيد الانتظار</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="/contract/{{ contract.id }}" class="btn-absher-outline"
-                                    style="padding: 6px 15px; font-size: 13px;">
-                                    عرض التفاصيل
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div
-                style="text-align: center; padding: 60px; background: #fff; border-radius: 12px; border: 1px dashed #ccc;">
-                <img src="/img/docs.svg" style="width: 60px; opacity: 0.5; margin-bottom: 15px;">
-                <h3 style="color: #666; margin-bottom: 15px;">لا توجد عقود حالياً</h3>
-                <a href="/create" class="btn-absher">إنشاء أول عقد</a>
-            </div>
-            {% endif %}
+        <!-- Quick Access Bottom -->
+        <h3 style="color: #555; margin-bottom: 15px;">وصول سريع</h3>
+        <div class="quick-actions">
+            <a href="/create?type=supply" class="action-btn">
+                <span class="action-icon">📦</span>
+                <div>عقد توريد</div>
+            </a>
+            <a href="/create?type=service" class="action-btn">
+                <span class="action-icon">🛠️</span>
+                <div>عقد خدمات</div>
+            </a>
+            <a href="/create?type=nda" class="action-btn">
+                <span class="action-icon">🔒</span>
+                <div>عدم إفصاح</div>
+            </a>
+            <a href="/create?type=rental" class="action-btn">
+                <span class="action-icon">🏠</span>
+                <div>عقد إيجار</div>
+            </a>
         </div>
 
     </main>
 
     <script>
+        // Charts Data
+        const typeData = {{ type_stats| tojson }};
+        const statusData = {{ status_stats| tojson }};
+
+        // Type Chart
+        new Chart(document.getElementById('typeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['توريد', 'خدمات', 'NDA', 'إيجار'],
+                datasets: [{
+                    data: [typeData.supply, typeData.service, typeData.nda, typeData.rental],
+                    backgroundColor: ['#00838f', '#00bfa5', '#ffa000', '#5d4037'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+        });
+
+        // Status Chart
+        new Chart(document.getElementById('statusChart'), {
+            type: 'pie',
+            data: {
+                labels: ['مكتمل', 'معلق'],
+                datasets: [{
+                    data: [statusData.signed, statusData.pending],
+                    backgroundColor: ['#2e7d32', '#ef6c00']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Lang Switch logic
         const switchLang = document.getElementById('switchLang');
         if (switchLang) {
             switchLang.addEventListener('click', () => {
                 const html = document.documentElement;
                 if (html.lang === 'ar') {
-                    html.lang = 'en';
-                    html.classList.remove('rtl');
-                    html.classList.add('ltr');
+                    html.lang = 'en'; html.classList.remove('rtl'); html.classList.add('ltr');
                 } else {
-                    html.lang = 'ar';
-                    html.classList.remove('ltr');
-                    html.classList.add('rtl');
+                    html.lang = 'ar'; html.classList.remove('ltr'); html.classList.add('rtl');
                 }
             });
         }

@@ -31,15 +31,52 @@ def dashboard():
         or_(Contract.supplier_cr == user_cr, Contract.buyer_cr == user_cr)
     ).order_by(Contract.created_at.desc()).all()
     
-    # Convert SQLAlchemy objects to dicts for template
-    contracts_data = [c.to_dict() for c in contracts]
+    # Calculate Statistics & Insights
+    user_cr = session['user'].get('cr')
+    user_name = session['user'].get('name')
     
-    # Add extra fields expected by template that might not be in to_dict
-    # The template likely expects direct attribute access if we passed objects, 
-    # but let's pass dicts to be safe or objects. 
-    # Actually, passing objects is fine for Jinja2.
-    
-    return render_template('index.html', user=session['user'], contracts=contracts)
+    actions_required = []
+    total_value = 0.0
+    type_stats = {'supply': 0, 'service': 0, 'nda': 0, 'rental': 0}
+    status_stats = {'signed': 0, 'pending': 0}
+
+    for c in contracts:
+        # Financials
+        try:
+            val = float(c.price) if c.price else 0
+            total_value += val
+        except:
+            pass
+            
+        # Type Distribution
+        ctype = c.contract_type or 'general'
+        type_stats[ctype] = type_stats.get(ctype, 0) + 1
+        
+        # Status
+        is_completed = c.signed_by_supplier and c.signed_by_buyer
+        if is_completed:
+            status_stats['signed'] += 1
+        else:
+            status_stats['pending'] += 1
+            
+        # Actions Required (If I am a party and haven't signed)
+        # Determine my role
+        my_role = None
+        if c.supplier_cr == user_cr: my_role = 'supplier'
+        elif c.buyer_cr == user_cr: my_role = 'buyer'
+        
+        if my_role == 'supplier' and not c.signed_by_supplier:
+            actions_required.append(c)
+        elif my_role == 'buyer' and not c.signed_by_buyer:
+            actions_required.append(c)
+
+    return render_template('index.html', 
+                         user=session['user'], 
+                         contracts=contracts,
+                         actions_required=actions_required,
+                         total_value=total_value,
+                         type_stats=type_stats,
+                         status_stats=status_stats)
 
 @main_bp.route('/service')
 def service_page():
