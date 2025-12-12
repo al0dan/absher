@@ -115,38 +115,43 @@
 
             <!-- AI Input Section (New) -->
             <div
-                style="background: linear-gradient(145deg, #f0f7ff 0%, #ffffff 100%); border: 1px solid #d0e3ff; border-radius: 12px; padding: 25px; margin-bottom: 40px; position: relative; overflow: hidden;">
-                <div
-                    style="position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--business-theme-color);">
-                </div>
+                style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); border: 2px solid #10B981; border-radius: 12px; padding: 25px; margin-bottom: 40px; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);">
 
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                     <div
-                        style="width: 32px; height: 32px; background: var(--business-theme-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                        style="width: 32px; height: 32px; background: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" style="width: 18px; height: 18px;">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                         </svg>
                     </div>
-                    <h3 style="margin: 0; color: var(--business-theme-color); font-size: 18px;">صِف العقد بكلماتك (AI)
-                    </h3>
+                    <div>
+                        <h3 style="margin: 0; color: #047857; font-size: 18px;">المساعد الذكي (AI)</h3>
+                        <span style="font-size: 12px; color: #059669;">صِف العقد بكلماتك وسأقوم بتعبئة النموذج لك</span>
+                    </div>
+                    <button type="button" onclick="runDemoMagic()"
+                        style="margin-right: auto; background: none; border: 1px dashed #10B981; color: #047857; padding: 5px 10px; border-radius: 20px; font-size: 12px; cursor: pointer;">✨
+                        تعبئة تجريبية</button>
                 </div>
 
                 <div style="position: relative;">
                     <textarea class="form-control" id="aiPrompt" rows="3"
                         placeholder="مثال: أريد عقد توريد 500 كرتون حليب من شركة المراعي إلى شركة سابك بقيمة 50,000 ريال لمدة سنة..."
-                        style="border-color: #d0e3ff; padding-left: 50px; font-size: 16px; background: white;"></textarea>
+                        style="border-color: #10B981; padding-left: 50px; font-size: 16px; background: rgba(255,255,255,0.7);"></textarea>
 
-                    <button type="button"
-                        style="position: absolute; left: 10px; bottom: 10px; background: none; border: none; cursor: pointer; color: #666; transition: color 0.2s;"
-                        title="استخدم الصوت (محاكاة)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" style="width: 24px; height: 24px;">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-                        </svg>
-                    </button>
+                    <div style="position: absolute; left: 10px; bottom: 10px; display: flex; gap: 10px;">
+                        <button type="button"
+                            style="background: none; border: none; cursor: pointer; color: #059669; transition: transform 0.2s;"
+                            title="تسجيل صوتي" onmouseover="this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" style="width: 24px; height: 24px;">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -269,19 +274,20 @@
                     <div class="form-group">
                         <label class="form-label" for="buyer_cr">رقم السجل التجاري <span
                                 style="font-size: 12px; color: #666;">(للتحقق)</span></label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" class="form-control" id="buyer_cr" name="buyer_cr"
-                                placeholder="1010XXXXXX" pattern="[0-9]{10}" maxlength="10" style="flex: 1;">
+                        <div style="display: flex; direction: ltr;">
                             <button type="button" class="btn-absher-outline" onclick="verifyCR()"
-                                style="white-space: nowrap; padding: 0 15px;">
+                                style="white-space: nowrap; padding: 0 15px; border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none; height: 45px; display: flex; align-items: center; background: #f8f9fa;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor"
-                                    style="width: 16px; height: 16px; margin-left: 5px;">
+                                    style="width: 16px; height: 16px; margin-right: 5px;">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                                 </svg>
                                 تحقق
                             </button>
+                            <input type="text" class="form-control" id="buyer_cr" name="buyer_cr"
+                                placeholder="1010XXXXXX" pattern="[0-9]{10}" maxlength="10"
+                                style="flex: 1; border-top-left-radius: 0; border-bottom-left-radius: 0; height: 45px; text-align: right; direction: rtl;">
                         </div>
                         <small id="crVerificationMsg" style="display: none; font-size: 11px; margin-top: 5px;"></small>
                     </div>
@@ -503,6 +509,87 @@
                 if (priceInput) priceInput.placeholder = "50,000.00";
                 if (priceInput) priceInput.step = "0.01";
             }
+
+            // Smart Defaults for Clauses
+            const conf = document.getElementById('clause_confidentiality');
+            const penalty = document.getElementById('clause_penalty');
+
+            if (conf) conf.checked = (type === 'nda');
+            if (penalty) penalty.checked = (type === 'supply' || type === 'service');
+        }
+
+        // Demo Magic Script
+        function runDemoMagic() {
+            const prompt = "عقد توريد 500 كرتون حليب من شركة المراعي إلى شركة سابك بقيمة 50,000 ريال لمدة سنة";
+            const textarea = document.getElementById('aiPrompt');
+
+            if (!textarea) return;
+
+            // Reset
+            textarea.value = "";
+            textarea.focus();
+
+            let i = 0;
+            const interval = setInterval(() => {
+                textarea.value += prompt.charAt(i);
+                i++;
+                if (i >= prompt.length) {
+                    clearInterval(interval);
+                    // Simulate AI Analysis Delay
+                    textarea.style.background = "#e8f5e9";
+                    setTimeout(fillDemoFields, 800);
+                }
+            }, 30);
+        }
+
+        function fillDemoFields() {
+            // 1. Select Type: Supply
+            const supplyCard = document.querySelector('input[value="supply"]').closest('.type-card');
+            if (supplyCard) selectType(supplyCard, 'supply');
+
+            // 2. Fill Details
+            const buyer = document.getElementById('buyer');
+            if (buyer) {
+                buyer.value = "شركة سابك للتجارة";
+                buyer.style.backgroundColor = "#e8f5e9";
+            }
+
+            const price = document.getElementById('price');
+            if (price) {
+                price.value = "50000";
+                price.style.backgroundColor = "#e8f5e9";
+            }
+
+            const items = document.getElementById('items');
+            if (items) {
+                items.value = "500 كرتون حليب (كامل الدسم)\nالمواصفات: إنتاج طازج، صلاحية لا تقل عن 6 أشهر\nالتعبئة: كراتين حفظ مبردة";
+                items.style.backgroundColor = "#e8f5e9";
+            }
+
+            // 3. Set Duration
+            const duration = document.getElementById('duration');
+            if (duration) {
+                duration.value = "1_year";
+                duration.style.backgroundColor = "#e8f5e9";
+            }
+
+            const start = document.getElementById('start_date');
+            if (start) {
+                start.valueAsDate = new Date();
+                start.style.backgroundColor = "#e8f5e9";
+            }
+
+            const payment = document.getElementById('payment_terms');
+            if (payment) {
+                payment.value = "monthly";
+                payment.style.backgroundColor = "#e8f5e9";
+            }
+
+            // Clear Flash
+            setTimeout(() => {
+                document.querySelectorAll('.form-control').forEach(el => el.style.backgroundColor = '');
+                document.getElementById('aiPrompt').style.backgroundColor = '';
+            }, 1500);
         }
 
         // Character Count
