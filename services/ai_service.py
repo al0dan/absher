@@ -123,12 +123,15 @@ def clean_ai_output(text: str) -> str:
 
 
 def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
-    """Generate contract using Groq API (Prioritizing ALLaM, fallback to Llama)."""
+    """Generate contract using Groq API with ALLaM-2-7B (SDAIA's Sovereign Arabic AI)."""
     if not GROQ_API_KEY:
         raise ValueError("GROQ_API_KEY not set")
     
-    # Priority: ALLaM-2-7B (SDAIA) -> Llama 3.3 (High Quality Fallback)
-    candidate_models = ["allam-2-7b", "llama-3.3-70b-versatile", "llama-3.1-70b-versatile"]
+    # ONLY USE ALLAM - SDAIA's Sovereign Arabic AI (Required for Hackathon)
+    # NO FALLBACK - If ALLaM fails, we want to know immediately
+    candidate_models = ["allam-2-7b"]
+    
+    logger.info("🇸🇦 Using ALLaM-2-7B (SDAIA Sovereign Arabic AI) for contract generation")
     
     start_time = time.time()
     
