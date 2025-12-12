@@ -67,35 +67,52 @@ def generate_with_allam_hf(prompt_system: str, prompt_user: str) -> str:
 
 
 def clean_ai_output(text: str) -> str:
-    """Clean AI-generated contract text by removing trailing garbage."""
+    """
+    Aggressively clean AI-generated contract text.
+    ALLaM-2-7B (7B params) tends to repeat signature blocks - we truncate after the FIRST one.
+    """
     if not text:
         return text
     
-    # Common patterns indicating end of actual contract
-    end_markers = [
-        "توقيع الطرف الأول",
-        "توقيع الطرف الثاني",
-        "توقيع المشتري",
-        "توقيع المورد",
+    # FIRST: Find the FIRST occurrence of signature/ending patterns and CUT there
+    first_end_markers = [
         "والله ولي التوفيق",
-        "تم تحرير هذا العقد",
-        "انتهى العقد"
+        "توقيع الطرف الأول:",
+        "توقيع المورد:",
+        "الممثل المعتمد لشركة",
+        "[اسم الممثل المعتمد",
+        "تم إبرام هذا العقد في مدينة",
+        "تم التوقيع على هذا العقد"
     ]
     
-    # Find the last occurrence of any end marker
-    last_valid_pos = len(text)
-    for marker in end_markers:
-        pos = text.rfind(marker)
-        if pos != -1:
-            # Include some reasonable ending after the marker
-            end_pos = text.find('\n\n', pos + len(marker))
-            if end_pos != -1 and end_pos < last_valid_pos:
-                last_valid_pos = end_pos
+    best_cut_pos = len(text)
     
-    # Also detect repetitive patterns (like "شهادة المنشأ:" repeated)
+    for marker in first_end_markers:
+        pos = text.find(marker)
+        if pos != -1:
+            # Find end of this section (next double newline or reasonable length after marker)
+            after_marker = pos + len(marker)
+            next_para = text.find('\n\n', after_marker)
+            
+            # For "والله ولي التوفيق", include a short signature section after
+            if marker == "والله ولي التوفيق":
+                # Allow up to 500 chars after for signatures, then cut
+                cut_point = min(after_marker + 500, next_para if next_para != -1 else after_marker + 500)
+            else:
+                # For other markers, include the line and one more paragraph
+                cut_point = next_para if next_para != -1 else after_marker + 200
+            
+            if cut_point < best_cut_pos:
+                best_cut_pos = cut_point
+    
+    # Cut at the best position found
+    if best_cut_pos < len(text):
+        text = text[:best_cut_pos].strip()
+    
+    # SECOND: Remove duplicate lines (ALLaM likes to repeat)
     lines = text.split('\n')
     unique_lines = []
-    seen_patterns = set()
+    seen = set()
     
     for line in lines:
         stripped = line.strip()
@@ -103,20 +120,18 @@ def clean_ai_output(text: str) -> str:
             unique_lines.append(line)
             continue
         
-        # Skip if we've seen this exact line multiple times
-        if stripped in seen_patterns:
-            # Check if this is a repeated certificate line
-            if 'شهادة' in stripped or ':' in stripped and len(stripped) < 30:
-                continue  # Skip repetitive certificate placeholders
+        # Skip exact duplicates
+        if stripped in seen:
+            continue
         
-        seen_patterns.add(stripped)
+        seen.add(stripped)
         unique_lines.append(line)
     
-    cleaned = '\n'.join(unique_lines).strip()
+    text = '\n'.join(unique_lines).strip()
     
-    # Remove trailing garbage (lines that are just labels with no content)
-    lines = cleaned.split('\n')
-    while lines and lines[-1].strip().endswith(':'):
+    # THIRD: Remove trailing garbage (lines ending with : or [ )
+    lines = text.split('\n')
+    while lines and (lines[-1].strip().endswith(':') or lines[-1].strip().endswith('[')):
         lines.pop()
     
     return '\n'.join(lines).strip()
@@ -150,9 +165,9 @@ def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
                         {'role': 'system', 'content': prompt_system},
                         {'role': 'user', 'content': prompt_user}
                     ],
-                    'temperature': 0.3,  # Slightly higher for more natural text
-                    'max_tokens': 2500,  # Allow enough for full contracts
-                    'stop': ['###', '---END---', 'شهادة المنشأ:', 'شهادة التأمين:']  # Stop on garbage patterns
+                    'temperature': 0.3,
+                    'max_tokens': 1500,  # Reduced to prevent ALLaM repetition
+                    'stop': ['###', '---END---', 'شهادة المنشأ:', 'شهادة التأمين:', 'بسم الله الرحمن الرحيم\nتم التوقيع']
                 },
                 timeout=30  # Increased timeout for larger responses
             )
