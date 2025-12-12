@@ -234,20 +234,7 @@
             </div>
 
             <form id="contractForm" aria-label="نموذج إنشاء عقد جديد">
-                <!-- Supplier Section (Auto-filled from login) -->
-                <h3 id="lbl-supplier"
-                    style="color: var(--business-theme-color); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
-                    بيانات الطرف الأول (المورد)
-                    <span style="font-size: 12px; color: #666; font-weight: normal;">- يتم تعبئتها تلقائياً من
-                        حسابك</span>
-                </h3>
-
-                <div class="form-group">
-                    <label class="form-label" for="supplier">اسم المنشأة</label>
-                    <input type="text" class="form-control" id="supplier" name="supplier"
-                        value="{{ user.name if user else '' }}" readonly
-                        style="background: #f5f5f5; cursor: not-allowed;">
-                </div>
+                <!-- Section 1: Parties (Starts Immediately after Contract Types) -->
 
                 <!-- Section 1: Parties -->
                 <div
@@ -257,12 +244,14 @@
                         أطراف العقد</h3>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                        <!-- Supplier (ReadOnly) -->
+                        <!-- Supplier (ReadOnly - from logged-in user) -->
                         <div class="form-group">
                             <label class="form-label" id="lbl-supplier">بيانات الطرف الأول (المورد)</label>
-                            <input type="text" class="form-control" name="supplier" value="شركة التقنية المتقدمة (أنا)"
-                                readonly style="background-color: #f9fafb; color: #666; cursor: not-allowed;">
-                            <input type="text" class="form-control" name="supplier_vat" value="310123456700003" readonly
+                            <input type="text" class="form-control" name="supplier"
+                                value="{{ user.name if user else 'غير مسجل' }}" readonly
+                                style="background-color: #f9fafb; color: #666; cursor: not-allowed;">
+                            <input type="text" class="form-control" name="supplier_vat"
+                                value="{{ user.vat if user else '' }}" readonly
                                 style="background-color: #f9fafb; color: #666; cursor: not-allowed; margin-top: 10px;">
                         </div>
 
@@ -278,9 +267,9 @@
                                         placeholder="سجل تجاري (1010...)" pattern="[0-9]{10}" maxlength="10"
                                         style="padding-left: 70px;">
                                     <button type="button" onclick="verifyCR()"
-                                        style="position: absolute; left: 5px; top: 5px; bottom: 5px; border: none; background: #f0fdf4; color: #10B981; border-radius: 6px; padding: 0 10px; font-size: 12px; cursor: pointer; transition: background 0.2s;"
-                                        onmouseover="this.style.background='#dcfce7'"
-                                        onmouseout="this.style.background='#f0fdf4'">
+                                        style="position: absolute; left: 5px; top: 5px; bottom: 5px; border: none; background: #10B981; color: white; border-radius: 6px; padding: 0 15px; font-size: 13px; cursor: pointer; transition: background 0.2s; font-weight: bold;"
+                                        onmouseover="this.style.background='#059669'"
+                                        onmouseout="this.style.background='#10B981'">
                                         تحقق 🔍
                                     </button>
                                 </div>
@@ -337,23 +326,25 @@
                     <div
                         style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; border-top: 1px solid #eee; padding-top: 20px;">
                         <div class="form-group">
-                            <label class="form-label">تاريخ بداية العقد</label>
-                            <input type="date" class="form-control" id="start_date" name="start_date">
+                            <label class="form-label" style="font-weight: bold;">تاريخ بداية العقد</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" min="2023-01-01">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">مدة العقد</label>
+                            <label class="form-label" style="font-weight: bold;">مدة العقد</label>
                             <select class="form-control" id="duration" name="duration">
                                 <option value="1_month">شهر واحد</option>
                                 <option value="3_months">3 أشهر</option>
                                 <option value="6_months">6 أشهر</option>
                                 <option value="1_year" selected>سنة واحدة (12 شهر)</option>
                                 <option value="2_years">سنتين</option>
+                                <option value="open">مفتوح المدة</option>
                             </select>
                         </div>
                         <!-- Clauses Section -->
                         <div class="form-group">
-                            <label class="form-label">البنود الإضافية (اختياري)</label>
-                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                            <label class="form-label" style="font-weight: bold;">البنود الإضافية (اختياري)</label>
+                            <div
+                                style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee;">
                                 <label style="display: flex; align-items: center; cursor: pointer; font-size: 13px;">
                                     <input type="checkbox" name="clauses" id="clause_penalty" style="margin-left: 8px;">
                                     <span>شرط جزائي (تأخير)</span>

@@ -193,23 +193,10 @@ def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
                         {'role': 'system', 'content': prompt_system},
                         {'role': 'user', 'content': prompt_user}
                     ],
-                    'temperature': 0.2,  # Lower for more deterministic output
-                    'max_tokens': 1000,  # Reduced to prevent repetition
-                    'top_p': 0.9,
-                    'stop': [
-                        '###',
-                        '---',
-                        'ملاحظة:',
-                        'ملاحظات:',
-                        'شهادة المنشأ',
-                        'شهادة التأمين',
-                        'المرفقات:',
-                        'نموذج',
-                        '**',
-                        'بسم الله الرحمن الرحيم\n\nبسم'  # Prevent restart
-                    ]
+                    'temperature': 0.3,
+                    'max_tokens': 800  # Reduced to prevent ALLaM repetition
                 },
-                timeout=45
+                timeout=60
             )
             response.raise_for_status()
 
