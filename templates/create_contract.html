@@ -528,6 +528,15 @@
                 }
             });
         }
+        // Read URL Query Param
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const typeParam = params.get('type');
+            if (typeParam && FIELD_LABELS[typeParam]) {
+                const card = document.querySelector(`.type-card input[value="${typeParam}"]`).closest('.type-card');
+                if (card) selectType(card, typeParam);
+            }
+        });
     </script>
 </body>
 
