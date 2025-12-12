@@ -628,29 +628,44 @@
                 if (card) selectType(card, 'supply');
             }
 
-            // 2. Find Demo Company (Buyer)
-            for (const [keyword, company] of Object.entries(DEMO_COMPANIES)) {
-                if (text.includes(keyword.toLowerCase()) || textAr.includes(keyword)) {
-                    // Check we're not talking about the supplier (self)
-                    const buyerPatterns = ['إلى', 'مع', 'لـ', 'ل ', 'to ', 'with '];
-                    const isLikelyBuyer = buyerPatterns.some(p => text.includes(p + keyword.toLowerCase()) || textAr.includes(p + keyword));
+            // 2. Find Demo Company (Buyer) - Use array for predictable order, exact matching
+            const DEMO_COMPANIES_LIST = [
+                { keywords: ['stc', 'اس تي سي', 'الاتصالات السعودية'], name: 'شركة الاتصالات السعودية', cr: '1010012345', vat: '300012345600003' },
+                { keywords: ['سابك', 'sabic'], name: 'سابك', cr: '1010010030', vat: '300010003000003' },
+                { keywords: ['المراعي', 'almarai'], name: 'شركة المراعي', cr: '1010084764', vat: '300084764000003' },
+                { keywords: ['موبايلي', 'mobily'], name: 'شركة اتحاد اتصالات', cr: '1010209450', vat: '300209450000003' },
+                { keywords: ['زين', 'zain'], name: 'شركة زين السعودية', cr: '1010246713', vat: '300246713000003' },
+                { keywords: ['جرير', 'jarir'], name: 'مكتبة جرير', cr: '1010043166', vat: '300043166000003' },
+                { keywords: ['اكسترا', 'extra'], name: 'شركة اكسترا', cr: '1010230789', vat: '300230789000003' },
+                { keywords: ['ارامكو', 'aramco'], name: 'أرامكو السعودية', cr: '2050008440', vat: '' },
+            ];
 
-                    if (isLikelyBuyer || !text.includes('من ' + keyword.toLowerCase())) {
-                        document.getElementById('buyer').value = company.name;
-                        document.getElementById('buyer_cr').value = company.cr;
-                        if (company.vat) document.getElementById('buyer_vat').value = company.vat;
-
-                        // Flash effect
-                        ['buyer', 'buyer_cr', 'buyer_vat'].forEach(id => {
-                            const el = document.getElementById(id);
-                            if (el) {
-                                el.style.backgroundColor = '#e8f5e9';
-                                setTimeout(() => el.style.backgroundColor = '', 1500);
-                            }
-                        });
+            let matchedCompany = null;
+            for (const company of DEMO_COMPANIES_LIST) {
+                for (const keyword of company.keywords) {
+                    // Use word boundary regex for English, includes() for Arabic
+                    const regex = new RegExp('\\b' + keyword + '\\b', 'i');
+                    if (regex.test(text) || textAr.includes(keyword)) {
+                        matchedCompany = company;
                         break;
                     }
                 }
+                if (matchedCompany) break;
+            }
+
+            if (matchedCompany) {
+                document.getElementById('buyer').value = matchedCompany.name;
+                document.getElementById('buyer_cr').value = matchedCompany.cr;
+                if (matchedCompany.vat) document.getElementById('buyer_vat').value = matchedCompany.vat;
+
+                // Flash effect
+                ['buyer', 'buyer_cr', 'buyer_vat'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.style.backgroundColor = '#e8f5e9';
+                        setTimeout(() => el.style.backgroundColor = '', 1500);
+                    }
+                });
             }
 
             // 3. Extract Price (numbers followed by ريال or SAR)
