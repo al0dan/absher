@@ -262,14 +262,44 @@
                             style="font-weight: bold; color: var(--business-theme-color); font-size: 20px;"></span>
                     </p>
 
-                    <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
-                        <p style="color: #555; margin-bottom: 15px;">لتوقيع العقد، شارك الرابط التالي مع الطرف الثاني:
+                    <div
+                        style="background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; margin-bottom: 25px; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <!-- Security Badge -->
+                        <div
+                            style="position: absolute; top: 0; left: 0; background: #e8f5e9; color: var(--business-theme-color); padding: 5px 15px; font-size: 12px; border-bottom-right-radius: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                style="width: 14px; height: 14px;">
+                                <path fill-rule="evenodd"
+                                    d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            رابط آمن ومشفّر
+                        </div>
+
+                        <p style="color: #333; margin-bottom: 15px; margin-top: 10px; font-weight: 500;">
+                            لتوقيع العقد، شارك الرابط الآمن التالي مع الطرف الثاني:
                         </p>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" class="form-control" id="buyerLink" readonly
-                                style="background: #fff; text-align: left; direction: ltr;">
-                            <button class="btn-absher-outline" style="padding: 10px 20px; white-space: nowrap;"
-                                onclick="copyLink('buyerLink')">نسخ الرابط</button>
+                            <div style="position: relative; flex-grow: 1;">
+                                <input type="text" class="form-control" id="buyerLink" readonly
+                                    style="background: #ffffff; text-align: left; direction: ltr; padding-left: 35px; border: 1px solid #ccc; color: #2c3e50; font-family: monospace; height: 45px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="#999"
+                                    style="width: 18px; height: 18px; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                </svg>
+                            </div>
+                            <button class="btn-absher-outline"
+                                style="padding: 0 25px; height: 45px; white-space: nowrap; border-color: var(--business-theme-color); color: var(--business-theme-color); display: flex; align-items: center; justify-content: center; gap: 5px;"
+                                onclick="copyLink('buyerLink')">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5" />
+                                </svg>
+                                نسخ
+                            </button>
                         </div>
                     </div>
 
@@ -419,9 +449,12 @@
                         document.getElementById('contractResult').classList.remove('hidden');
                         document.getElementById('contractIdBadge').textContent = '#' + result.id;
 
-                        // Update link to force login usage
+                        // Update link and button
                         const baseUrl = window.location.origin;
-                        document.getElementById('buyerLink').value = `${baseUrl}/contract/${result.id}`;
+                        const contractUrl = `${baseUrl}/contract/${result.id}`;
+
+                        document.getElementById('buyerLink').value = contractUrl;
+                        document.getElementById('viewContractBtn').href = `/contract/${result.id}`;
 
                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                     } else {
