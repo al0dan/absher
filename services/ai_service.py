@@ -164,6 +164,10 @@ def clean_ai_output(text: str) -> str:
 def generate_with_groq(prompt_system: str, prompt_user: str) -> str:
     """Generate contract using Groq API with ALLaM-2-7B (SDAIA's Sovereign Arabic AI)."""
     groq_api_key = _get_env('GROQ_API_KEY')
+    
+    # Debug logging
+    logger.info(f"🔑 GROQ_API_KEY loaded: {'Yes' if groq_api_key else 'No'} (length: {len(groq_api_key) if groq_api_key else 0})")
+    
     if not groq_api_key:
         raise ValueError("GROQ_API_KEY not set")
 
