@@ -50,6 +50,12 @@ class WathqService:
             logger.info(f"Wathq cache hit for {cr_number}")
             return self._cache[cache_key]
         
+        # DEMO MODE: Check if this is a known demo CR first (before calling real API)
+        demo_result = self._check_demo_cr(cr_number)
+        if demo_result:
+            logger.info(f"Wathq: Using demo data for CR {cr_number}")
+            return demo_result
+        
         # Simulation mode if no API key
         if not self.api_key:
             logger.info(f"Wathq: No API key, simulating lookup for {cr_number}")
@@ -127,30 +133,10 @@ class WathqService:
 
     def _simulate_lookup(self, cr: str) -> dict | None:
         """Return mock data when API is unavailable."""
-        # Known Saudi companies for demo
-        known_crs = {
-            '1010084764': {'name': 'شركة المراعي', 'en': 'Almarai Company', 'city': 'الرياض', 'capital': 8000000000},
-            '1010012345': {'name': 'شركة الاتصالات السعودية', 'en': 'STC', 'city': 'الرياض', 'capital': 50000000000},
-            '2050008440': {'name': 'أرامكو السعودية', 'en': 'Saudi Aramco', 'city': 'الظهران', 'capital': 60000000000},
-            '1010010030': {'name': 'سابك', 'en': 'SABIC', 'city': 'الرياض', 'capital': 30000000000},
-            '1010209450': {'name': 'شركة اتحاد اتصالات', 'en': 'Mobily', 'city': 'الرياض', 'capital': 5839000000},
-            '4030073366': {'name': 'شركة النهدي الطبية', 'en': 'Al Nahdi Medical', 'city': 'جدة', 'capital': 1125000000},
-        }
-        
-        if cr in known_crs:
-            match = known_crs[cr]
-            return {
-                'company_name': match['name'],
-                'company_name_en': match['en'],
-                'cr_number': cr,
-                'status': 'قائم',  # Active
-                'status_id': '1',
-                'city': match['city'],
-                'capital': match['capital'],
-                'type': 'شركة ذات مسؤولية محدودة',
-                'retrieved_at': datetime.now().isoformat(),
-                '_simulated': True
-            }
+        # Try demo CR first
+        demo = self._check_demo_cr(cr)
+        if demo:
+            return demo
         
         # Generic fallback for valid-looking CRs
         region_map = {'1': 'الرياض', '2': 'مكة', '3': 'المدينة', '4': 'الشرقية', '5': 'القصيم', '6': 'عسير'}
@@ -166,6 +152,42 @@ class WathqService:
                 'type': 'مؤسسة فردية',
                 'retrieved_at': datetime.now().isoformat(),
                 '_simulated': True
+            }
+        
+        return None
+    
+    def _check_demo_cr(self, cr: str) -> dict | None:
+        """Return demo data for known demo user CRs (matches app.py demo users)."""
+        # All demo users from app.py - these CRs are NOT real, so we must return mock data
+        demo_crs = {
+            # Format: CR -> (name_ar, name_en, vat, city)
+            '1010084764': ('شركة المراعي', 'Almarai Company', '300084764000003', 'الرياض'),
+            '1010012345': ('شركة الاتصالات السعودية', 'STC', '300012345600003', 'الرياض'),
+            '1010010030': ('سابك', 'SABIC', '300010003000003', 'الرياض'),
+            '1010209450': ('شركة اتحاد اتصالات', 'Mobily', '300209450000003', 'الرياض'),
+            '1010246713': ('شركة زين السعودية', 'Zain KSA', '300246713000003', 'الرياض'),
+            '1010043166': ('مكتبة جرير', 'Jarir Bookstore', '300043166000003', 'الرياض'),
+            '1010230789': ('شركة اكسترا', 'Extra Stores', '300230789000003', 'الرياض'),
+            '1010101010': ('شركة التقنية المتقدمة', 'Advanced Tech Co', '310101010100003', 'الرياض'),
+            # Real companies (for Wathq lookup demo)
+            '2050008440': ('أرامكو السعودية', 'Saudi Aramco', '', 'الظهران'),
+            '4030073366': ('شركة النهدي الطبية', 'Al Nahdi Medical', '', 'جدة'),
+        }
+        
+        if cr in demo_crs:
+            name_ar, name_en, vat, city = demo_crs[cr]
+            return {
+                'company_name': name_ar,
+                'company_name_en': name_en,
+                'cr_number': cr,
+                'vat_number': vat,
+                'status': 'قائم',  # Active
+                'status_id': '1',
+                'city': city,
+                'capital': 100000000,  # 100M default
+                'type': 'شركة ذات مسؤولية محدودة',
+                'retrieved_at': datetime.now().isoformat(),
+                '_demo': True
             }
         
         return None
