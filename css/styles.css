@@ -173,12 +173,13 @@ body {
 .action-btn {
     transition: all 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
 }
 
 .action-btn:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    border-color: var(--business-theme-color);
+    border: 1px solid var(--business-theme-color);
 }
 
 .status-badge.bg-orange {
@@ -196,8 +197,20 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    direction: rtl;
-    /* Force RTL layout */
+    /* In RTL, row makes first item right, last item left.
+       HTML: [Icon+Text] [Button]
+       Result: [Icon+Text] on Right, [Button] on Left. Correct.
+    */
+    flex-direction: row;
+}
+
+/* Ensure table rows feel interactive */
+.absher-table tbody tr {
+    cursor: pointer;
+}
+
+.absher-table tbody tr:hover {
+    background-color: #f5fafd !important;
 }
 
 .rtl {

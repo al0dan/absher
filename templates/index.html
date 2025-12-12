@@ -370,11 +370,12 @@
                         </thead>
                         <tbody>
                             {% for c in contracts[:5] %}
-                            <tr style="transition: background 0.2s;" onmouseover="this.style.background='#fbfbfb'"
+                            <tr onclick="window.location.href='/contract/{{ c.id }}'"
+                                style="transition: background 0.2s;" onmouseover="this.style.background='#f5fafd'"
                                 onmouseout="this.style.background='white'">
                                 <td style="padding: 18px 25px; font-weight: bold; font-family: monospace; color: #555;">
                                     #{{ c.id }}</td>
-                                <td style="color: #666; font-size: 13px;">12/12/2025</td> <!-- Demo Date -->
+                                <td style="color: #666; font-size: 13px;">2025/12/12</td>
                                 <td style="font-weight: 500;">{{ c.buyer }}</td>
                                 <td style="font-weight: bold;">{{ "{:,.2f}".format(c.price) }}</td>
                                 <td>
@@ -403,7 +404,7 @@
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg> NDA
+                                        </svg> عدم إفصاح
                                     </span>
                                     {% else %}
                                     عام
@@ -483,7 +484,7 @@
                         </li>
                         <li
                             style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0;">
-                            <span>NDA</span> <span style="font-weight: bold;">{{ type_stats.nda }}</span>
+                            <span>عدم إفصاح</span> <span style="font-weight: bold;">{{ type_stats.nda }}</span>
                         </li>
                         <li style="display: flex; justify-content: space-between; padding: 10px 0;">
                             <span>إيجار</span> <span style="font-weight: bold;">{{ type_stats.rental }}</span>
